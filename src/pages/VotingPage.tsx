@@ -185,7 +185,7 @@ export default function VotingPage() {
                   style={{
                     background: totalAllocated === TOTAL_VOTES
                       ? 'linear-gradient(135deg, #10b981, #059669)'
-                      : 'linear-gradient(135deg, #8b5cf6, #6d28d9)'
+                      : 'linear-gradient(135deg, #004526, #064e3b)'
                   }}
                 />
               </div>
@@ -234,9 +234,9 @@ export default function VotingPage() {
                     onClick={() => toggleCandidate(candidate.id)}
                     style={{
                       background: isSelected
-                        ? 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(109,40,217,0.08) 100%)'
+                        ? 'linear-gradient(135deg, rgba(6,78,59,0.12) 0%, rgba(0,69,38,0.06) 100%)'
                         : 'var(--color-surface)',
-                      border: `1px solid ${isSelected ? 'rgba(139,92,246,0.5)' : 'var(--color-border)'}`,
+                      border: `1px solid ${isSelected ? 'rgba(0,69,38,0.5)' : 'var(--color-border)'}`,
                       borderRadius: 'var(--radius-lg)',
                       padding: 'var(--sp-4)',
                       cursor: 'pointer',

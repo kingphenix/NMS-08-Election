@@ -135,7 +135,7 @@ function TurnoutRing({ voted, total }: { voted: number; total: number }) {
 function ResultsChart({ results }: { results: CandidateResult[] }) {
   const sorted = [...results].sort((a, b) => b.votes - a.votes)
   const maxVotes = Math.max(...results.map(r => r.votes), 1)
-  const COLORS = ['#8b5cf6', '#6d28d9', '#7c3aed', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe']
+  const COLORS = ['#004526', '#064e3b', '#047857', '#059669', '#10b981', '#34d399', '#6ee7b7']
 
   return (
     <div>

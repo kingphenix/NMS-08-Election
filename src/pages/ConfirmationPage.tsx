@@ -46,7 +46,7 @@ export default function ConfirmationPage() {
             Vote Recorded!
           </h1>
           <p className="text-muted" style={{ fontSize: '1.05rem', maxWidth: 320, margin: '0 auto' }}>
-            Your ballot has been securely submitted. Thank you for participating in the NMS 08 election.
+            Your ballot has been securely submitted. Thank you for participating in the NMS 08 election for the Set Chairman.
           </p>
         </motion.div>
 
