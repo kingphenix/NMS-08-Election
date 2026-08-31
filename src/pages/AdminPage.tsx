@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { adminResetToken } from '../lib/api'
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
+  BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell,
 } from 'recharts'
 
 const TOTAL_VOTERS = 150
@@ -151,17 +151,7 @@ function ResultsChart({ results }: { results: CandidateResult[] }) {
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip
-            contentStyle={{
-              background: 'rgba(13,19,32,0.95)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 8,
-              color: 'var(--color-text)',
-              fontFamily: 'Inter, sans-serif',
-            }}
-            formatter={(v: unknown) => [`${v} votes`, 'Total']}
-            cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-          />
+          {/* Tooltip removed per request */}
           <Bar dataKey="votes" radius={[0, 6, 6, 0]} label={{ position: 'right', fill: 'var(--color-text-muted)', fontSize: 13 }}>
             {sorted.map((_, i) => (
               <Cell key={i} fill={COLORS[i % COLORS.length]} />
