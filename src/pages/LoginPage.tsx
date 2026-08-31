@@ -5,6 +5,8 @@ import { loginWithToken } from '../lib/api'
 import { setSession } from '../lib/session'
 import logo from '../assets/nms-new-logo.webp'
 
+import { supabaseUrl, supabaseAnonKey } from '../lib/supabase'
+
 type LoginState = 'idle' | 'loading' | 'error'
 type ErrorCode = 'INVALID_TOKEN' | 'ALREADY_USED' | 'RATE_LIMITED' | 'ALREADY_VOTED' | 'NETWORK'
 
@@ -99,6 +101,15 @@ export default function LoginPage() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         style={{ position: 'relative', zIndex: 1 }}
       >
+        {(!supabaseUrl || !supabaseAnonKey) && (
+          <div className="alert alert-error" style={{ marginBottom: 'var(--sp-4)' }}>
+            <span>⚠️</span>
+            <span>
+              Supabase environment variables are missing! Make sure <strong>VITE_SUPABASE_URL</strong> and <strong>VITE_SUPABASE_ANON_KEY</strong> are set in Vercel Environment Variables.
+            </span>
+          </div>
+        )}
+
         <div className="text-center" style={{ marginBottom: 'var(--sp-6)' }}>
           <p className="text-muted">Enter your unique credential token to begin voting.</p>
         </div>

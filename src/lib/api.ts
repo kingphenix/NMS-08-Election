@@ -1,7 +1,7 @@
 // src/lib/api.ts
 // Typed wrappers around all Edge Function calls.
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
+import { supabaseUrl, supabaseAnonKey } from './supabase'
 
 export interface BallotEntry {
   candidate_id: string
@@ -18,13 +18,12 @@ async function callEdge<T>(
   body: object,
   extraHeaders: Record<string, string> = {}
 ): Promise<T> {
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/${fn}`, {
+  const res = await fetch(`${supabaseUrl}/functions/v1/${fn}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${anonKey}`,
-      'apikey': anonKey,
+      'Authorization': `Bearer ${supabaseAnonKey}`,
+      'apikey': supabaseAnonKey,
       ...extraHeaders,
     },
     mode: 'cors',
