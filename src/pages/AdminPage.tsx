@@ -397,9 +397,26 @@ function AuditLogTable({ entries }: { entries: AuditEntry[] }) {
 
 
 
+const ADMIN_PW_KEY = 'nms_admin_pw'
+
 /* ── Main Admin Page ───────────────────────────────────────── */
 export default function AdminPage() {
-  const [adminPw, setAdminPw] = useState<string | null>(null)
+  const [adminPw, setAdminPwState] = useState<string | null>(() => {
+    try {
+      return sessionStorage.getItem(ADMIN_PW_KEY)
+    } catch {
+      return null
+    }
+  })
+
+  const setAdminPw = (pw: string | null) => {
+    try {
+      if (pw) sessionStorage.setItem(ADMIN_PW_KEY, pw)
+      else sessionStorage.removeItem(ADMIN_PW_KEY)
+    } catch {}
+    setAdminPwState(pw)
+  }
+
   const [activeTab, setActiveTab] = useState<Tab>('results')
 
   const [results, setResults] = useState<CandidateResult[]>([])
@@ -407,6 +424,7 @@ export default function AdminPage() {
   const [credentials, setCredentials] = useState<Credential[]>([])
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([])
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
 
   const fetchResults = useCallback(async () => {
     // Vote totals
@@ -453,6 +471,12 @@ export default function AdminPage() {
     if (data) setAuditLog(data)
   }, [])
 
+  const handleManualRefresh = useCallback(async () => {
+    setRefreshing(true)
+    await Promise.all([fetchResults(), fetchCredentials(), fetchAuditLog()])
+    setRefreshing(false)
+  }, [fetchResults, fetchCredentials, fetchAuditLog])
+
   useEffect(() => {
     if (!adminPw) return
 
@@ -462,6 +486,7 @@ export default function AdminPage() {
 
     const interval = setInterval(() => {
       fetchResults()
+      fetchCredentials()
       fetchAuditLog()
     }, POLL_INTERVAL_MS)
 
@@ -481,16 +506,32 @@ export default function AdminPage() {
     <div style={{ minHeight: '100dvh', padding: 'var(--sp-6) var(--sp-4)', paddingBottom: 'var(--sp-16)' }}>
       <div className="max-w-xl">
         {/* Header */}
-        <div className="flex justify-between items-center" style={{ marginBottom: 'var(--sp-6)' }}>
+        <div className="flex justify-between items-center" style={{ marginBottom: 'var(--sp-6)', flexWrap: 'wrap', gap: 12 }}>
           <div>
             <h1 style={{ fontSize: '1.75rem' }}>Admin Dashboard</h1>
             <p className="text-sm text-muted">
               {lastUpdated ? `Last updated ${lastUpdated.toLocaleTimeString()}` : 'Loading…'}
               {' · '}
-              <span style={{ color: 'var(--color-success)' }}>Live (30s polling)</span>
+              <span style={{ color: 'var(--color-success)' }}>Live (30s auto-refresh)</span>
             </p>
           </div>
-          <a href="/" className="btn btn-secondary btn-sm">← Voter View</a>
+          <div className="flex items-center gap-2">
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={handleManualRefresh}
+              disabled={refreshing}
+            >
+              🔄 {refreshing ? 'Refreshing…' : 'Refresh Data'}
+            </button>
+            <a href="/" className="btn btn-secondary btn-sm">← Voter View</a>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => setAdminPw(null)}
+              title="Lock Admin Session"
+            >
+              🔒 Logout
+            </button>
+          </div>
         </div>
 
         {/* Tab Nav */}
