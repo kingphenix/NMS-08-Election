@@ -513,7 +513,6 @@ export default function AdminPage() {
             >
               🔄 {refreshing ? 'Refreshing…' : 'Refresh Data'}
             </button>
-            <a href="/" className="btn btn-secondary btn-sm">← Voter View</a>
             <button
               className="btn btn-secondary btn-sm"
               onClick={() => setAdminPw(null)}
