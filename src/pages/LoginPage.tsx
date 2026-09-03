@@ -90,8 +90,18 @@ export default function LoginPage() {
         background: '#064e3b',
         zIndex: 10
       }}>
-        <img src={logo} alt="NMS Logo" style={{ height: '56px', width: 'auto', marginRight: 'var(--sp-3)', objectFit: 'contain' }} />
-        <h1 style={{ fontSize: '2.25rem', margin: 0, fontWeight: 800, letterSpacing: '-0.03em', color: '#ffffff' }}>NMS 08 Election</h1>
+        <img
+          src={logo}
+          alt="NMS Logo"
+          style={{ height: '56px', width: 'auto', marginRight: 'var(--sp-3)', objectFit: 'contain', cursor: 'pointer' }}
+          onClick={() => navigate('/')}
+        />
+        <h1
+          style={{ fontSize: '2.25rem', margin: 0, fontWeight: 800, letterSpacing: '-0.03em', color: '#ffffff', cursor: 'pointer' }}
+          onClick={() => navigate('/')}
+        >
+          NMS 08 Election
+        </h1>
       </div>
 
       <motion.div
@@ -192,6 +202,7 @@ export default function LoginPage() {
 
         {/* Footer note */}
         <p className="text-center text-xs text-subtle" style={{ marginTop: 'var(--sp-5)' }}>
+          <a href="/" style={{ color: 'var(--color-primary)', fontWeight: 600, marginRight: '12px' }}>← View Manifesto</a>
           Having trouble? Contact your election administrator.{' '}
           <a href="/admin" style={{ color: 'var(--color-text-subtle)' }}>Admin →</a>
         </p>
