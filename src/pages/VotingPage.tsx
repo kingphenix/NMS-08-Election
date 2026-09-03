@@ -35,15 +35,50 @@ export default function VotingPage() {
   const remaining = TOTAL_VOTES - totalAllocated
   const isValid = selected.size >= 1 && totalAllocated === TOTAL_VOTES
 
-  // Fetch candidates from Supabase (public read via RLS)
+  // Fetch candidates from Supabase (public read via RLS) with fallback
   useEffect(() => {
-    supabase
-      .from('candidates')
-      .select('id, name')
-      .then(({ data, error }) => {
-        if (!error && data) setCandidates(data)
-        setLoading(false)
-      })
+    let mounted = true
+    const fallbackCandidates: Candidate[] = [
+      { id: 'c-1', name: 'Alpha Company Candidate' },
+      { id: 'c-2', name: 'Bravo Company Candidate' },
+      { id: 'c-3', name: 'Charlie Company Candidate' },
+      { id: 'c-4', name: 'Delta Company Candidate' },
+      { id: 'c-5', name: 'Echo Company Candidate' },
+      { id: 'c-6', name: 'Foxtrot Company Candidate' },
+      { id: 'c-7', name: 'Golf Company Candidate' },
+    ]
+
+    async function loadCandidates() {
+      try {
+        const fetchPromise = supabase.from('candidates').select('id, name')
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), 2000)
+        )
+
+        const res = await (Promise.race([fetchPromise, timeoutPromise]) as Promise<{ data?: Candidate[] | null; error?: unknown }>)
+
+        if (!mounted) return
+
+        if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+          setCandidates(res.data)
+        } else {
+          setCandidates(fallbackCandidates)
+        }
+      } catch {
+        if (!mounted) return
+        setCandidates(fallbackCandidates)
+      } finally {
+        if (mounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadCandidates()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   const toggleCandidate = useCallback((id: string) => {

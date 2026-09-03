@@ -68,19 +68,42 @@ export default function ManifestoPage() {
   }
 
   useEffect(() => {
+    let mounted = true
+
     async function loadCandidates() {
       try {
-        const { data } = await supabase.from('candidates').select('id, name')
-        const mapped = COMPANY_CANDIDATES.map((comp, idx) => ({
-          id: data && data[idx] ? data[idx].id : `c-${idx + 1}`,
-          name: comp.name,
-          color: comp.color,
-          tagline: LOREM_TAGLINE,
-          bio: LOREM_BIO,
-          pledges: LOREM_PLEDGES
-        }))
-        setCandidates(mapped)
+        const fetchPromise = supabase.from('candidates').select('id, name')
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), 2000)
+        )
+
+        const res = await (Promise.race([fetchPromise, timeoutPromise]) as Promise<{ data?: Array<{ id: string; name: string }> | null }>)
+
+        if (!mounted) return
+
+        if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+          const mapped = COMPANY_CANDIDATES.map((comp, idx) => ({
+            id: res.data![idx]?.id || `c-${idx + 1}`,
+            name: comp.name,
+            color: comp.color,
+            tagline: LOREM_TAGLINE,
+            bio: LOREM_BIO,
+            pledges: LOREM_PLEDGES
+          }))
+          setCandidates(mapped)
+        } else {
+          const mapped = COMPANY_CANDIDATES.map((comp, idx) => ({
+            id: `c-${idx + 1}`,
+            name: comp.name,
+            color: comp.color,
+            tagline: LOREM_TAGLINE,
+            bio: LOREM_BIO,
+            pledges: LOREM_PLEDGES
+          }))
+          setCandidates(mapped)
+        }
       } catch {
+        if (!mounted) return
         const mapped = COMPANY_CANDIDATES.map((comp, idx) => ({
           id: `c-${idx + 1}`,
           name: comp.name,
@@ -91,11 +114,17 @@ export default function ManifestoPage() {
         }))
         setCandidates(mapped)
       } finally {
-        setLoading(false)
+        if (mounted) {
+          setLoading(false)
+        }
       }
     }
 
     loadCandidates()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   const filteredCandidates = candidates.filter(c =>
@@ -581,21 +610,22 @@ export default function ManifestoPage() {
               </div>
 
               {/* Modal Actions */}
-              <div style={{ display: 'flex', gap: 'var(--sp-4)', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: 'var(--sp-6)' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', borderTop: '1px solid #e2e8f0', paddingTop: 'var(--sp-6)' }}>
                 <button
                   onClick={() => setSelectedCandidate(null)}
                   className="btn btn-secondary"
-                  style={{ background: '#f1f5f9', color: '#0f172a', borderColor: '#cbd5e1', fontWeight: 600 }}
+                  style={{
+                    background: '#f1f5f9',
+                    color: '#0f172a',
+                    borderColor: '#cbd5e1',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    padding: '12px 32px',
+                    borderRadius: 'var(--radius-md)',
+                    minWidth: '200px'
+                  }}
                 >
                   Close Manifesto
-                </button>
-                <button
-                  onClick={() => navigate('/login')}
-                  className="btn"
-                  style={{ background: '#10b981', color: '#064e3b', fontWeight: 700, border: 'none' }}
-                >
-                  <Vote size={18} />
-                  Proceed to Voting Booth
                 </button>
               </div>
             </motion.div>

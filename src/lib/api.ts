@@ -18,27 +18,43 @@ async function callEdge<T>(
   body: object,
   extraHeaders: Record<string, string> = {}
 ): Promise<T> {
-  const res = await fetch(`${supabaseUrl}/functions/v1/${fn}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${supabaseAnonKey}`,
-      'apikey': supabaseAnonKey,
-      ...extraHeaders,
-    },
-    mode: 'cors',
-    body: JSON.stringify(body),
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 10000)
 
-  const data = await res.json()
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/${fn}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'apikey': supabaseAnonKey,
+        ...extraHeaders,
+      },
+      mode: 'cors',
+      body: JSON.stringify(body),
+      signal: controller.signal
+    })
 
-  if (!res.ok) {
-    const err = new Error(data.error ?? 'Unknown error')
-    ;(err as unknown as Record<string, string>).code = data.code ?? 'UNKNOWN'
+    clearTimeout(timeoutId)
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      const err = new Error(data.error ?? 'Unknown error')
+      ;(err as unknown as Record<string, string>).code = data.code ?? 'UNKNOWN'
+      throw err
+    }
+
+    return data as T
+  } catch (err: unknown) {
+    clearTimeout(timeoutId)
+    if ((err as Error)?.name === 'AbortError') {
+      const timeoutErr = new Error('Request timed out. Please check your internet connection.')
+      ;(timeoutErr as unknown as Record<string, string>).code = 'NETWORK'
+      throw timeoutErr
+    }
     throw err
   }
-
-  return data as T
 }
 
 /** Authenticate with a voter token. Returns credential_id if successful. */
