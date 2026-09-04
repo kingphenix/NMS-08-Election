@@ -6,7 +6,9 @@ import bravoCandidateImg from '../assets/images/Bravo Company Candidate.jpeg'
 import charlieCandidateImg from '../assets/images/Charlie Company Candidate.jpeg'
 import deltaCandidateImg from '../assets/images/Delta Company Candidate.jpeg'
 import echoCandidateImg from '../assets/images/Echo Company Candidate.jpeg'
+import foxtrotCandidateImg from '../assets/images/Foxtrot Company Candidate.jpeg'
 import golfCandidateImg from '../assets/images/Golf Company Candidate.jpeg'
+
 import { supabase } from '../lib/supabase'
 import { Vote, Award, CheckCircle2, Search, BookOpen, X, Maximize2, Camera } from 'lucide-react'
 
@@ -271,7 +273,7 @@ const COMPANY_CANDIDATES: CompanyCandidate[] = [
   { name: 'Charlie Company Candidate', company: 'Charlie Company Candidate', color: '#dc2626', photoUrl: charlieCandidateImg }, /* Red */
   { name: 'Delta Company Candidate', company: 'Delta Company Candidate', color: '#16a34a', photoUrl: deltaCandidateImg },   /* Green */
   { name: 'Echo Company Candidate', company: 'Echo Company Candidate', color: '#9333ea', photoUrl: echoCandidateImg },       /* Purple */
-  { name: 'Foxtrot Company Candidate', company: 'Foxtrot Company Candidate', color: '#78350f' },                             /* Brown */
+  { name: 'Foxtrot Company Candidate', company: 'Foxtrot Company Candidate', color: '#78350f', photoUrl: foxtrotCandidateImg }, /* Brown */
   { name: 'Golf Company Candidate', company: 'Golf Company Candidate', color: '#db2777', photoUrl: golfCandidateImg },       /* Pink */
 ]
 
@@ -280,9 +282,11 @@ const getCandidatePhotoUrl = (name: string): string | undefined => {
   if (name.includes('Charlie')) return charlieCandidateImg
   if (name.includes('Delta')) return deltaCandidateImg
   if (name.includes('Echo')) return echoCandidateImg
+  if (name.includes('Foxtrot') || name.includes('Isah') || name.includes('Muhammad') || name.includes('Muhammed')) return foxtrotCandidateImg
   if (name.includes('Golf') || name.includes('Isaac') || name.includes('Danmusa')) return golfCandidateImg
   return undefined
 }
+
 
 const INITIAL_CANDIDATES: CandidateInfo[] = COMPANY_CANDIDATES.map((comp, idx) => {
   const isBravo = comp.company.includes('Bravo')
