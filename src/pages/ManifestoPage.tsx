@@ -2,17 +2,25 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import logo from '../assets/nms-new-logo.webp'
+import bravoCandidateImg from '../assets/images/Bravo Company Candidate.jpeg'
+import charlieCandidateImg from '../assets/images/Charlie Company Candidate.jpeg'
+import deltaCandidateImg from '../assets/images/Delta Company Candidate.jpeg'
+import echoCandidateImg from '../assets/images/Echo Company Candidate.jpeg'
+import golfCandidateImg from '../assets/images/Golf Company Candidate.jpeg'
 import { supabase } from '../lib/supabase'
 import { Vote, Award, CheckCircle2, Search, BookOpen, X, Maximize2, Camera } from 'lucide-react'
 
 interface CandidateInfo {
   id: string
   name: string
+  company: string
   color: string
   photoUrl?: string
   tagline: string
   bio: string
   pledges: string[]
+  fullManifesto?: string[]
+  fullPledges?: string[]
 }
 
 const LOREM_TAGLINE = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
@@ -28,25 +36,279 @@ const LOREM_FULL_MANIFESTO = [
   'Morbi lectus risus, porta vel, pharetra dui, sed, pellentesque at, eros. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra.'
 ]
 
+/* ── Bravo Company Candidate Official Manifesto Data ── */
+const BRAVO_TAGLINE = 'Dedicated to Total Transparency, Robust Member Welfare, and Enduring Brotherhood.'
+
+const BRAVO_BIO =
+  'Honourable members of the NMS 08 Ex-Boys chapter. Having been nominated by my prestigious company members, it is my humble pleasure to declare to you my aspiration of becoming the Chairman of this prestigious set. My administration will serve with dedicated stewardship, total financial transparency, and genuine welfare for all comrades.'
+
+const BRAVO_CARD_PLEDGES = [
+  'Welfare & Relief: Continuous wedding gifts, compassionate financial assistance, and official visitations for celebrations, illness, and bereavement.',
+  'Employment & Prosperity: Strategic networking with sister chapters and the national body for jobs, plus collective investment vehicles.',
+  'Accountability: Consolidated single association account with multi-signatory control and quarterly financial reports.',
+  'Brotherhood & Unity: Accessible get-togethers, friendly games to reminisce old days, zero fraud tolerance, and dispute mediation.'
+]
+
+const BRAVO_FULL_MANIFESTO = [
+  'Honourable members of NMS 08 Ex-Boys chapter. Having been nominated by my prestigious company members, it is my humble pleasure to declare to you my aspiration of becoming the Chairman of this prestigious set. If elected, I pledge to serve the best interest of the NMS 08 chapter to the very best of my ability, ensuring that no member walks alone.',
+  'Member Welfare & Social Solidarity: We will stand firmly with every comrade through both joyful milestones and unexpected hardships. We will continue financial support for newlyweds, coordinate delegations to celebrate with members, and offer rapid compassionate visits and relief to those battling illness or grieving the loss of loved ones.',
+  'Career Networking & Collective Investments: Our administration will build active bridges with sister chapters and the national alumni executive body to connect qualified members with career opportunities. Additionally, we will identify secure, profitable investment vehicles to increase our financial standing both individually and as a group.',
+  'Airtight Financial Transparency: Trust is the cornerstone of great leadership. We will guarantee complete fiscal accountability by consolidating all association funds into a single official account requiring multiple verified signatories, complemented by comprehensive quarterly financial balance sheets delivered directly to general members.',
+  'Camaraderie, Integrity & Fraternal Harmony: We will organize affordable get-togethers in neutral settings to socialize without financial strain, alongside friendly games to enjoy ourselves and reminisce about our school days. We will enforce strict zero-tolerance policies on fraud between members and proactively resolve disputes so we truly live as our brothers’ keepers with zero bad blood.'
+]
+
+export const BRAVO_FULL_PLEDGES = [
+  'Serve the best interest of the NMS 08 chapter to the best of my ability.',
+  'Continue to provide financial aid to newly wedded members among us.',
+  'Network with other chapters and the national body to secure jobs for qualified members.',
+  'Organise official visits to those of us celebrating personal occasions.',
+  'Organise compassionate visits and relief for members experiencing illness or loss of a loved one.',
+  'Give responsive aid and emergency relief in whatever way possible to members in need.',
+  'Ensure total financial transparency by presenting quarterly reports to general members.',
+  'Collect all monetary funds in a single association account with multiple signatories for accountability.',
+  'Find viable investment vehicles to increase our financial standings both as individuals and as a group.',
+  'Organise accessible get-togethers where we can meet and socialise without serious financial strain.',
+  'Organise friendly games where we can enjoy ourselves and reminisce the old days.',
+  'Uphold strict zero-tolerance measures when it comes to fraudulent issues between members.',
+  'Proactively resolve disputes between members to ensure we live as our brothers’ keepers without bad blood.'
+]
+
+/* ── Charlie Company Candidate Official Manifesto Data ── */
+const CHARLIE_TAGLINE = 'Turning Brotherhood into Influence, Opportunities into Impact, and Impact into Legacy.'
+
+const CHARLIE_BIO =
+  'Fourteen years ago, we entered NMS as boys; in 2014, we walked out as men. Today, we are professionals, entrepreneurs, and leaders of influence. My mission is to transform NMS 08 into a highly connected, prosperous, and impactful brotherhood where membership is not merely a title, but an undeniable advantage built on trust, mutual opportunity, and accountability.'
+
+const CHARLIE_CARD_PLEDGES = [
+  'Connect — Know Your Brother: Establish an active NMS 08 Members Network linking skills, businesses, locations, and opportunities.',
+  'Create — Build Opportunities: Move beyond congratulations to foster B2B collaborations, professional referrals, and pooled investments.',
+  'Care — Brotherhood Beyond Words: Practical, responsive welfare mechanisms ensuring we celebrate, mourn, stand, and rise together.',
+  'Accountability & Trust: Consultative governance, open communication, transparent stewardship, and responsible resource management.'
+]
+
+const CHARLIE_FULL_MANIFESTO = [
+  'Fourteen years ago, we entered the gates of the Nigerian Military School as boys. In 2014, we walked out as men. We came from different backgrounds, families, and parts of the country with different dreams and abilities. But the School gave us something indelible: a bond. It taught us discipline when we wanted comfort, resilience in hardship, responsibility over excuses, and the foundational truth that a man is stronger when he stands shoulder-to-shoulder with his brothers.',
+  'Today, we are doctors, engineers, lawyers, entrepreneurs, soldiers, academics, administrators, professionals, fathers, husbands, and leaders. We have become men of influence—and the time has come for NMS 08 to harness that influence into an association where membership is an active advantage built on trust, collaboration, and brotherhood.',
+  'Our 4-Point Agenda: (1) CONNECT — Establishing a functional Members Network so our collective strength becomes our greatest asset. (2) CREATE — Combining our hundreds of years of professional experience into business collaborations, career referrals, mentorship, and investment initiatives so NMS 08 becomes a vibrant marketplace of ideas and opportunities.',
+  'Our 4-Point Agenda: (3) CARE — Strengthening our welfare system so brotherhood is proven when a brother needs us most; celebrating together, mourning together, standing together, and rising together. (4) ACCOUNTABILITY — Clear communication, consultative decision-making, responsible financial stewardship, and regular reporting because leadership is earned through action.',
+  'The NMS 08 Standard: Discipline in our dealings, Unity in our brotherhood, Excellence in our endeavors, Integrity in our leadership, and Service in our purpose. Chairmanship is not a throne—it is a sacred responsibility. Let us turn our brotherhood into influence, our influence into opportunities, our opportunities into impact, and our impact into legacy. The time is now!'
+]
+
+export const CHARLIE_FULL_PLEDGES = [
+  'Establish a functional NMS 08 Members Network keeping us connected professionally and personally.',
+  'Create active pathways for business-to-business collaborations and entrepreneurship partnerships.',
+  'Facilitate professional job referrals, career opportunities, and executive networking across industries.',
+  'Establish collective investment vehicles to build individual and set-wide financial standing.',
+  'Institutionalize mentorship, skill sharing, and professional knowledge transfer between comrades.',
+  'Strengthen the welfare system to provide practical, reliable support during critical moments of need.',
+  'Celebrate personal and career milestones together as an unbreakable brotherhood.',
+  'Provide compassionate visits, presence, and relief during illness, bereavement, or hardship.',
+  'Maintain clear and continuous communication so every member is informed of association affairs.',
+  'Ensure responsible financial management with uncompromising integrity and transparent accounting.',
+  'Institutionalize consultative leadership where key decisions involve the general membership.',
+  'Provide regular stewardship and financial reporting to the general assembly.',
+  'Uphold the NMS 08 Standard: Discipline, Unity, Excellence, Integrity, and Service.'
+]
+
+/* ── Echo Company Candidate Official Manifesto Data (Ukonna Ikenna Kingsley) ── */
+const ECHO_TAGLINE = 'Unity, Progress, and Lasting Impact — Service Over Self, Action Over Promises.'
+
+const ECHO_BIO =
+  'Dear Esteemed Members of the NMS 08 Set, leadership is not about holding a title—it is about listening, serving, and ensuring every member feels valued and represented. Together, we can build a stronger, more united, and more impactful community that we will all be proud to belong to.'
+
+const ECHO_CARD_PLEDGES = [
+  'Unity & Inclusiveness: Foster brotherhood across all regions and backgrounds, guaranteeing every member a voice in decisions.',
+  'Transparency & Accountability: Open communication, scheduled activity updates, and total fiscal accountability to general members.',
+  'Structured Welfare System: Dependable welfare safety nets providing mutual assistance, compassion, and solidarity during major life events.',
+  'Effective Communication & Growth: Timely briefings, two-way feedback, and sustainable leadership structures benefiting NMS 08 and Ex-Boys at large.'
+]
+
+const ECHO_FULL_MANIFESTO = [
+  'Theme: "Unity, Progress, and Lasting Impact." Dear Esteemed Members of the NMS 08 Set, it is with great humility and a strong sense of responsibility that I present myself to serve as your Set Chairman. Leadership, to me, is not about holding a title—it is about listening, serving, and ensuring that every member feels valued and represented.',
+  'Vision & Mission: My vision is to build an Association that is united, inclusive, transparent, and committed to the welfare and success of every member. My mission is to lead with integrity, accountability, and dedication while creating opportunities for growth, collaboration, and lasting friendships among all comrades.',
+  '5-Point Agenda (Unity, Transparency & Welfare): (1) Unity & Inclusiveness — Promoting unity among all members regardless of location or background, encouraging active participation, and ensuring everyone has a voice. (2) Transparency & Accountability — Maintaining open communication, regular updates on set finances and activities, and accountability in all leadership decisions. (3) Welfare & Member Support — Establishing a structured welfare system to support members during significant life events and fostering community solidarity.',
+  '5-Point Agenda (Communication & Growth): (4) Effective Communication — Improving communication through regular meetings, timely updates, and proactive member feedback. (5) Growth & Legacy — Organizing meaningful social, professional, and networking activities, facilitating mentorship, and building a sustainable leadership structure that will benefit both the NMS 08 Set and Ex-Boys at large.',
+  'My Leadership Promise: If entrusted with your mandate, I promise to lead with honesty and fairness, listen before making decisions, treat every member with respect, work tirelessly for the progress of our set, and remain accessible and accountable throughout my tenure. Because I believe in service over self, action over promises, unity over division, progress over stagnation, and accountability over excuses. Together, we can build a stronger, united, and more prosperous NMS 08 Set. — UKONNA IKENNA KINGSLEY'
+]
+
+export const ECHO_FULL_PLEDGES = [
+  'Promote unity among all members regardless of location, background, or chapter.',
+  'Encourage active, enthusiastic participation in all NMS 08 set activities.',
+  'Ensure every member has an active voice and representation in decision-making.',
+  'Maintain open, continuous communication between the executive and members.',
+  'Provide regular updates on the activities and financial stewardship of the set.',
+  'Enforce total accountability and transparency in all leadership decisions.',
+  'Establish a structured welfare system to support members during significant life events.',
+  'Promote mutual assistance, compassionate care, and solidarity among comrades.',
+  'Improve communication through regular meetings, timely briefings, and member feedback.',
+  'Organize meaningful social, professional, and industry networking activities.',
+  'Encourage mentorship, skills enhancement, and career development opportunities.',
+  'Build a sustainable leadership structure that benefits both NMS 08 and Ex-Boys at large.',
+  'Uphold the Leadership Promise: Service over self, action over promises, and progress over stagnation.'
+]
+
+/* ── Delta Company Candidate Official Manifesto Data ── */
+const DELTA_TAGLINE = 'One Set. One Vision. Lasting Legacy — Together We Served. Together We Lead. Together We Build.'
+
+const DELTA_BIO =
+  'Fellow Distinguished Members of NMS 08 Set, our strength has never been in our individual companies, but in the enduring brotherhood we continue to share. Today, I present myself not as the candidate of one company, but as a servant of the entire Set—committed to strengthening our institutions, ensuring total transparency, and building opportunities that benefit every member.'
+
+const DELTA_CARD_PLEDGES = [
+  'Institutional Governance: Review and strengthen our governance framework within 100 days, standardize transitions, and collaborate with EXBA.',
+  'Transparency & Accountability: Deliver quarterly financial reports, annual stewardship accounts, and comprehensive documentation.',
+  'Welfare & Brotherhood: Robust emergency funds, hospital visitation, bereavement family support, and celebrating personal milestones.',
+  'Business & Legacy: Establish a Set Business Directory, quarterly networking, mentorship, career platforms, and lasting legacy projects.'
+]
+
+const DELTA_FULL_MANIFESTO = [
+  'One Set. One Vision. Lasting Legacy. Fellow Distinguished Members of NMS 08 Set, twelve years after passing out from the Nigerian Military School, our strength has never been in the companies we belonged to, but in the brotherhood we continue to share. Today, I present myself not as the candidate of one company, but as a humble servant of the entire NMS 08 Set.',
+  'Strengthening Our Institution & Transparency: Our predecessors laid an important foundation; my commitment is to build on that foundation. Within my first 100 days, I will work with the Governing Council to review our governance framework, standardize leadership transition procedures, ensure administrative continuity, and actively collaborate with EXBA. Our set deserves institutions, not personalities.',
+  'Accountability & Stewardship: Every member deserves to know how our resources are managed. My administration will provide detailed quarterly financial reports, annual stewardship accounts, open communication on all projects and decisions, and proper institutional documentation for future administrations. Trust grows through transparency.',
+  'Welfare & Professional Network: No member should feel forgotten. We will strengthen emergency welfare support, hospital visitations, bereavement support, and personal milestone celebrations. Furthermore, our Set is blessed with officers, professionals, entrepreneurs, doctors, lawyers, bankers, engineers, and public servants. I will establish a Set Business Directory, quarterly professional networking sessions, mentorship programs, and career referral platforms.',
+  'Legacy & My Promise: Working with the Set, we will identify and execute projects that leave a lasting legacy—including educational initiatives, community development, strengthening our annual reunion, and digital preservation of our history. I cannot promise perfection, but every decision will be guided by one question: "Will this make the NMS 08 Set stronger today and for generations to come?" Together We Served. Together We Lead. Together We Build.'
+]
+
+export const DELTA_FULL_PLEDGES = [
+  'Review and strengthen our set governance framework within the first 100 days.',
+  'Standardize leadership transition procedures to guarantee continuity between administrations.',
+  'Foster active, structured collaboration and alignment with the EXBA national body.',
+  'Provide comprehensive quarterly financial reports directly to the general membership.',
+  'Deliver annual stewardship reports detailing all executive decisions and association projects.',
+  'Strengthen emergency welfare funds to rapidly assist members in times of urgent need.',
+  'Organize hospital visitations and compassionate solidarity for sick comrades.',
+  'Provide dedicated family support and presence during moments of bereavement.',
+  'Celebrate members’ personal, family, and career milestones together.',
+  'Establish a comprehensive NMS 08 Set Business & Professional Directory.',
+  'Host quarterly professional networking, career advancement, and mentorship sessions.',
+  'Create a reliable business referral platform connecting member enterprises.',
+  'Execute lasting legacy projects: educational support, digital history preservation, and sustainable ventures.'
+]
+
+/* ── Foxtrot Company Candidate Official Manifesto Data (Isah Muhammad) ── */
+const FOXTROT_TAGLINE = 'Delivering on Brotherhood — Listen, Organise, Communicate, Deliver, and Leave No Brother Behind.'
+
+const FOXTROT_BIO =
+  'Fellow Ex-Boys, I am Isah Muhammad (NMS 08/6672/B-WO), proud son of Foxtrot Company (Calabar Coy). I am not contesting for a title, but to contribute with humility, willingness to listen, and readiness to take responsibility. My vision is to build an association members can genuinely depend on—where every brother is heard, supported, and connected, ensuring that when any brother needs help, he knows his set stands firmly behind him.'
+
+const FOXTROT_CARD_PLEDGES = [
+  'The 5 Principles: Listen to members, organise our collective talents, communicate consistently, enforce total accountability, and deliver realistic results.',
+  'Welfare — Nobody Left Behind: Transparent, organized, and prompt assistance for celebrations, hospital care, and family bereavement.',
+  'Brotherhood into Opportunity: Connect entrepreneurs, professionals, employers, and investors for career guidance, patronage, and business referrals.',
+  'Sustainable Investments: Professionally and transparently explore collective ventures in agriculture, real estate, and transportation.'
+]
+
+const FOXTROT_FULL_MANIFESTO = [
+  'Fellow Ex-Boys, I present myself to you with humility, pride, and deep responsibility. I am Isah Muhammad (Ex-boy NMS 08/6672/B-WO), a proud son of Foxtrot Company — Calabar Coy. I sincerely appreciate Foxtrot Company for their trust and confidence in presenting me as their candidate for Chairman. That trust is not just a nomination; it is a sacred responsibility that I will never take for granted.',
+  'Why I Am Contesting & The 5 Principles: I am not contesting because I want a title; I am contesting because I believe I can contribute. My administration will be anchored on five core principles: (1) LISTEN — Listening to members because this association belongs to all of us; (2) ORGANISE — Marshalling our doctors, lawyers, engineers, entrepreneurs, and civil servants into an organized collective force; (3) COMMUNICATE — Ensuring clear, consistent updates so no brother feels disconnected; (4) ACCOUNTABILITY — Every contribution and resource respected, tracked, and accounted for; and (5) DELIVERY — Pursuing and fulfilling realistic commitments rather than making empty promises.',
+  'Welfare — Nobody Gets Left Behind: Our welfare must remain one of the strongest pillars of NMS 08. When a brother celebrates, we celebrate with him. When a brother is struggling, sick, or loses a loved one, we stand firmly beside him. We will establish clear procedures, proper records, and responsible management to ensure assistance reaches members fairly, transparently, and swiftly.',
+  'Turning Brotherhood into Opportunity & Sustainability: We have doctors, lawyers, entrepreneurs, employers, and investors. When we deliberately connect these strengths, opportunities emerge—job guidance, business partnerships, professional mentorship, and commercial patronage. Furthermore, our association should not rely solely on levies; we will professionally and transparently explore sustainable group investments in agriculture, real estate, and transportation to generate lasting institutional value.',
+  'Indivisible Unity & Final Appeal: An election must never destroy decades of friendship or make one company feel superior. When this election is over, there will be no Alpha NMS 08, no Bravo NMS 08, no Foxtrot NMS 08—there will simply be NMS 08. I will serve Alpha, Bravo, Charlie, Delta, Echo, Foxtrot, and Golf as one family. I ask for the privilege to serve: not above you, but with you. — ISAH MUHAMMAD'
+]
+
+export const FOXTROT_FULL_PLEDGES = [
+  'Listen actively to all members and ensure every comrade’s voice shapes association policy.',
+  'Organise the collective expertise of our doctors, lawyers, engineers, and entrepreneurs.',
+  'Maintain clear, consistent communication so no brother ever feels disconnected.',
+  'Uphold total financial accountability with transparent documentation for every resource.',
+  'Prioritize realistic deliverable commitments over empty campaign promises.',
+  'Strengthen our welfare system ensuring fair, rapid, and transparent assistance to members.',
+  'Stand in solid support during bereavement, illness, and personal emergencies.',
+  'Celebrate brothers’ joyful milestones, promotions, and achievements collectively.',
+  'Create an active internal marketplace for business partnerships and professional referrals.',
+  'Facilitate career guidance, job placements, and executive mentorship between comrades.',
+  'Carefully and transparently explore sustainable group investments in real estate and agriculture.',
+  'Ensure complete set-wide unity, serving Alpha, Bravo, Charlie, Delta, Echo, Foxtrot, and Golf as one.',
+  'Lead with humble brotherhood: serving not above the members, but together with all Ex-Boys.'
+]
+
+/* ── Golf Company Candidate Official Manifesto Data (Isaac Danmusa) ── */
+const GOLF_TAGLINE = 'Uniting Our Strengths, Honoring Our Bond, and Building an Impactful Legacy Together.'
+
+const GOLF_BIO =
+  'Dear Distinguished Members of NMS 08 Set, our journey began within the walls of NMS where we learned discipline, integrity, courage, and selfless service. Though life has taken us down different paths, our unbreakable bond inspires me to serve. My vision is simple: to build a stronger, more united, and more impactful NMS 08 Set that every single comrade is proud to belong to.'
+
+const GOLF_CARD_PLEDGES = [
+  'Strengthening Unity: Ensure every member feels valued, respected, and included, regardless of location, profession, or background.',
+  'Transparent Leadership: Open decision-making, rigorous accountability in set affairs, and constant communication to maintain trust.',
+  'Structured Member Welfare: Dependable welfare initiatives to assist members during life emergencies, milestone celebrations, and bereavement.',
+  'Networking & Legacy: Professional mentorship, business collaborations, regular reunions, friendly sports, and preserving set history.'
+]
+
+const GOLF_FULL_MANIFESTO = [
+  'Dear Distinguished Members of the NMS 08 Set, warm greetings to you all. It is with a deep sense of responsibility, humility, and commitment that I present myself for the position of Chairman of our great NMS 08 Set. Our journey began within the walls of the Nigerian Military School, where we were taught discipline, integrity, courage, teamwork, and selfless service. Though life has taken each of us on different paths, the bond we share remains unique and unbreakable. It is this bond that inspires me to serve.',
+  'Vision & Priorities (Unity & Transparency): My vision is simple: to build a stronger, more united, and more impactful NMS 08 Set that every member is proud to belong to. (1) Strengthening Unity: Working to ensure every member feels valued, respected, and included regardless of location, profession, or level of participation. (2) Transparent & Accountable Leadership: Leadership is built on trust; I am committed to openness in decision-making, accountability in managing our affairs, and regular communication with members.',
+  'Priorities (Welfare & Career Networking): (3) Welfare of Members: Our association should be a source of support during both joyful and challenging moments through structured, fair, and sustainable welfare initiatives for emergencies, celebrations, and bereavement. (4) Career & Business Networking: Encouraging networking opportunities, mentorship, business collaborations, and career development initiatives benefiting every member across military and civilian sectors.',
+  'Priorities (Engagement & Legacy): (5) Stronger Engagement: Promoting regular virtual and physical engagements, reunions, sports activities, and social events that preserve the brotherhood we built at NMS. (6) Preserving Our Legacy: Documenting our history, memories, and collective accomplishments for future generations.',
+  'Leadership Promise & Call for Unity: If elected, I promise to lead with humility rather than pride, listen before making decisions, serve every member without bias or favoritism, encourage teamwork, and always place the collective interest of the NMS 08 Set above personal interest. This election is not about individuals competing against one another—it is about choosing leadership that will strengthen our brotherhood and position our set for greater achievements. Long Live NMS! Long Live the NMS 08 Set! — ISAAC DANMUSA'
+]
+
+export const GOLF_FULL_PLEDGES = [
+  'Ensure every member feels valued, respected, and included regardless of location or profession.',
+  'Guarantee that every comrade’s voice is heard in guiding association decisions.',
+  'Practice open, transparent decision-making with regular updates to the general assembly.',
+  'Maintain strict financial accountability and integrity in managing association resources.',
+  'Provide structured, reliable welfare support during emergencies, celebrations, and life events.',
+  'Facilitate professional networking, business partnerships, and career advancement across sectors.',
+  'Establish structured mentorship programs connecting experienced comrades with rising professionals.',
+  'Organize regular virtual engagements and town halls to bridge members across different regions.',
+  'Host annual physical reunions, social events, and friendly sports activities to strengthen camaraderie.',
+  'Support initiatives that preserve the history, achievements, and legacy of the NMS 08 Set.',
+  'Lead with humility, listening attentively before making any major executive decision.',
+  'Serve every member impartially without bias, favoritism, or sectional sentiment.',
+  'Always prioritize the collective progress of the NMS 08 Set above personal interest.'
+]
+
 interface CompanyCandidate {
   name: string
+  company: string
   color: string
+  photoUrl?: string
 }
 
 const COMPANY_CANDIDATES: CompanyCandidate[] = [
-  { name: 'Alpha Company Candidate', color: '#1e40af' },   /* Deep Navy Blue */
-  { name: 'Bravo Company Candidate', color: '#a16207' },   /* Dark Ochre / Muted Gold */
-  { name: 'Charlie Company Candidate', color: '#991b1b' }, /* Dark Crimson / Burgundy */
-  { name: 'Delta Company Candidate', color: '#065f46' },   /* Deep Forest Green */
-  { name: 'Echo Company Candidate', color: '#6b21a8' },    /* Dark Regal Purple */
-  { name: 'Foxtrot Company Candidate', color: '#571c05' }, /* Deep Bronze / Espresso */
-  { name: 'Golf Company Candidate', color: '#9d174d' },    /* Deep Muted Rose */
+  { name: 'Alpha Company Candidate', company: 'Alpha Company Candidate', color: '#2563eb' },                                   /* Blue */
+  { name: 'Bravo Company Candidate', company: 'Bravo Company Candidate', color: '#ca8a04', photoUrl: bravoCandidateImg },   /* Yellow */
+  { name: 'Charlie Company Candidate', company: 'Charlie Company Candidate', color: '#dc2626', photoUrl: charlieCandidateImg }, /* Red */
+  { name: 'Delta Company Candidate', company: 'Delta Company Candidate', color: '#16a34a', photoUrl: deltaCandidateImg },   /* Green */
+  { name: 'Echo Company Candidate', company: 'Echo Company Candidate', color: '#9333ea', photoUrl: echoCandidateImg },       /* Purple */
+  { name: 'Foxtrot Company Candidate', company: 'Foxtrot Company Candidate', color: '#78350f' },                             /* Brown */
+  { name: 'Golf Company Candidate', company: 'Golf Company Candidate', color: '#db2777', photoUrl: golfCandidateImg },       /* Pink */
 ]
+
+const getCandidatePhotoUrl = (name: string): string | undefined => {
+  if (name.includes('Bravo')) return bravoCandidateImg
+  if (name.includes('Charlie')) return charlieCandidateImg
+  if (name.includes('Delta')) return deltaCandidateImg
+  if (name.includes('Echo')) return echoCandidateImg
+  if (name.includes('Golf') || name.includes('Isaac') || name.includes('Danmusa')) return golfCandidateImg
+  return undefined
+}
+
+const INITIAL_CANDIDATES: CandidateInfo[] = COMPANY_CANDIDATES.map((comp, idx) => {
+  const isBravo = comp.company.includes('Bravo')
+  const isCharlie = comp.company.includes('Charlie')
+  const isDelta = comp.company.includes('Delta')
+  const isEcho = comp.company.includes('Echo')
+  const isFoxtrot = comp.company.includes('Foxtrot')
+  const isGolf = comp.company.includes('Golf')
+  return {
+    id: `c-${idx + 1}`,
+    name: comp.name,
+    company: comp.company,
+    color: comp.color,
+    photoUrl: comp.photoUrl,
+    tagline: isBravo ? BRAVO_TAGLINE : isCharlie ? CHARLIE_TAGLINE : isDelta ? DELTA_TAGLINE : isEcho ? ECHO_TAGLINE : isFoxtrot ? FOXTROT_TAGLINE : isGolf ? GOLF_TAGLINE : LOREM_TAGLINE,
+    bio: isBravo ? BRAVO_BIO : isCharlie ? CHARLIE_BIO : isDelta ? DELTA_BIO : isEcho ? ECHO_BIO : isFoxtrot ? FOXTROT_BIO : isGolf ? GOLF_BIO : LOREM_BIO,
+    pledges: isBravo ? BRAVO_CARD_PLEDGES : isCharlie ? CHARLIE_CARD_PLEDGES : isDelta ? DELTA_CARD_PLEDGES : isEcho ? ECHO_CARD_PLEDGES : isFoxtrot ? FOXTROT_CARD_PLEDGES : isGolf ? GOLF_CARD_PLEDGES : LOREM_PLEDGES,
+    fullManifesto: isBravo ? BRAVO_FULL_MANIFESTO : isCharlie ? CHARLIE_FULL_MANIFESTO : isDelta ? DELTA_FULL_MANIFESTO : isEcho ? ECHO_FULL_MANIFESTO : isFoxtrot ? FOXTROT_FULL_MANIFESTO : isGolf ? GOLF_FULL_MANIFESTO : LOREM_FULL_MANIFESTO,
+    fullPledges: isBravo ? BRAVO_FULL_PLEDGES : isCharlie ? CHARLIE_FULL_PLEDGES : isDelta ? DELTA_FULL_PLEDGES : isEcho ? ECHO_FULL_PLEDGES : isFoxtrot ? FOXTROT_FULL_PLEDGES : isGolf ? GOLF_FULL_PLEDGES : undefined
+  }
+})
 
 export default function ManifestoPage() {
   const navigate = useNavigate()
-  const [candidates, setCandidates] = useState<CandidateInfo[]>([])
-  const [loading, setLoading] = useState(true)
+  const [candidates, setCandidates] = useState<CandidateInfo[]>(INITIAL_CANDIDATES)
+  const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateInfo | null>(null)
   const [candidatePhotos, setCandidatePhotos] = useState<Record<string, string>>({})
@@ -82,37 +344,35 @@ export default function ManifestoPage() {
         if (!mounted) return
 
         if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
-          const mapped = COMPANY_CANDIDATES.map((comp, idx) => ({
-            id: res.data![idx]?.id || `c-${idx + 1}`,
-            name: comp.name,
-            color: comp.color,
-            tagline: LOREM_TAGLINE,
-            bio: LOREM_BIO,
-            pledges: LOREM_PLEDGES
-          }))
+          const mapped = COMPANY_CANDIDATES.map((comp, idx) => {
+            const dbCandidate = res.data![idx]
+            const name = dbCandidate?.name || comp.name
+            const isBravo = comp.company.includes('Bravo') || name.includes('Bravo')
+            const isCharlie = comp.company.includes('Charlie') || name.includes('Charlie')
+            const isDelta = comp.company.includes('Delta') || name.includes('Delta') || name.includes('Filani') || name.includes('Victor')
+            const isEcho = comp.company.includes('Echo') || name.includes('Echo') || name.includes('Ukonna') || name.includes('Ikenna')
+            const isFoxtrot = comp.company.includes('Foxtrot') || name.includes('Foxtrot') || name.includes('Isah') || name.includes('Muhammad') || name.includes('Muhammed')
+            const isGolf = comp.company.includes('Golf') || name.includes('Golf') || name.includes('Isaac') || name.includes('Danmusa')
+            return {
+              id: dbCandidate?.id || `c-${idx + 1}`,
+              name,
+              company: comp.company,
+              color: comp.color,
+              photoUrl: comp.photoUrl || getCandidatePhotoUrl(name) || getCandidatePhotoUrl(comp.company),
+              tagline: isBravo ? BRAVO_TAGLINE : isCharlie ? CHARLIE_TAGLINE : isDelta ? DELTA_TAGLINE : isEcho ? ECHO_TAGLINE : isFoxtrot ? FOXTROT_TAGLINE : isGolf ? GOLF_TAGLINE : LOREM_TAGLINE,
+              bio: isBravo ? BRAVO_BIO : isCharlie ? CHARLIE_BIO : isDelta ? DELTA_BIO : isEcho ? ECHO_BIO : isFoxtrot ? FOXTROT_BIO : isGolf ? GOLF_BIO : LOREM_BIO,
+              pledges: isBravo ? BRAVO_CARD_PLEDGES : isCharlie ? CHARLIE_CARD_PLEDGES : isDelta ? DELTA_CARD_PLEDGES : isEcho ? ECHO_CARD_PLEDGES : isFoxtrot ? FOXTROT_CARD_PLEDGES : isGolf ? GOLF_CARD_PLEDGES : LOREM_PLEDGES,
+              fullManifesto: isBravo ? BRAVO_FULL_MANIFESTO : isCharlie ? CHARLIE_FULL_MANIFESTO : isDelta ? DELTA_FULL_MANIFESTO : isEcho ? ECHO_FULL_MANIFESTO : isFoxtrot ? FOXTROT_FULL_MANIFESTO : isGolf ? GOLF_FULL_MANIFESTO : LOREM_FULL_MANIFESTO,
+              fullPledges: isBravo ? BRAVO_FULL_PLEDGES : isCharlie ? CHARLIE_FULL_PLEDGES : isDelta ? DELTA_FULL_PLEDGES : isEcho ? ECHO_FULL_PLEDGES : isFoxtrot ? FOXTROT_FULL_PLEDGES : isGolf ? GOLF_FULL_PLEDGES : undefined
+            }
+          })
           setCandidates(mapped)
         } else {
-          const mapped = COMPANY_CANDIDATES.map((comp, idx) => ({
-            id: `c-${idx + 1}`,
-            name: comp.name,
-            color: comp.color,
-            tagline: LOREM_TAGLINE,
-            bio: LOREM_BIO,
-            pledges: LOREM_PLEDGES
-          }))
-          setCandidates(mapped)
+          setCandidates(INITIAL_CANDIDATES)
         }
       } catch {
         if (!mounted) return
-        const mapped = COMPANY_CANDIDATES.map((comp, idx) => ({
-          id: `c-${idx + 1}`,
-          name: comp.name,
-          color: comp.color,
-          tagline: LOREM_TAGLINE,
-          bio: LOREM_BIO,
-          pledges: LOREM_PLEDGES
-        }))
-        setCandidates(mapped)
+        setCandidates(INITIAL_CANDIDATES)
       } finally {
         if (mounted) {
           setLoading(false)
@@ -128,7 +388,8 @@ export default function ManifestoPage() {
   }, [])
 
   const filteredCandidates = candidates.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.company.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (
@@ -393,8 +654,16 @@ export default function ManifestoPage() {
                         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
                           {candidate.name}
                         </h3>
-                        <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>
-                          Candidate #{index + 1}
+                        <span
+                          style={{
+                            fontSize: '0.85rem',
+                            color: candidate.color || COMPANY_CANDIDATES[index]?.color || '#2563eb',
+                            fontWeight: 700,
+                            letterSpacing: '0.01em',
+                            display: 'inline-block'
+                          }}
+                        >
+                          {candidate.company || COMPANY_CANDIDATES[index]?.company || `Candidate #${index + 1}`}
                         </span>
                       </div>
                     </div>
@@ -565,8 +834,14 @@ export default function ManifestoPage() {
                   <h2 style={{ fontSize: '1.85rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>
                     {selectedCandidate.name}
                   </h2>
-                  <span style={{ fontSize: '0.9rem', color: selectedCandidate.color, fontWeight: 600 }}>
-                    Official Manifesto Document — NMS 08 Election
+                  <span
+                    style={{
+                      fontSize: '0.9rem',
+                      color: selectedCandidate.color || COMPANY_CANDIDATES.find(c => c.name === selectedCandidate.name)?.color || '#2563eb',
+                      fontWeight: 700
+                    }}
+                  >
+                    {selectedCandidate.company || COMPANY_CANDIDATES.find(c => c.name === selectedCandidate.name)?.company || 'Candidate'} — Official Manifesto Document
                   </span>
                 </div>
               </div>
@@ -587,7 +862,7 @@ export default function ManifestoPage() {
                   {selectedCandidate.bio}
                 </p>
 
-                {LOREM_FULL_MANIFESTO.map((paragraph, pIdx) => (
+                {(selectedCandidate.fullManifesto || LOREM_FULL_MANIFESTO).map((paragraph, pIdx) => (
                   <p key={pIdx} style={{ fontSize: '0.95rem', color: '#334155', lineHeight: 1.7, marginBottom: 'var(--sp-4)' }}>
                     {paragraph}
                   </p>
@@ -600,7 +875,7 @@ export default function ManifestoPage() {
                   Key Strategic Action Items & Pledges
                 </h3>
                 <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {selectedCandidate.pledges.map((pledge, pIdx) => (
+                  {(selectedCandidate.fullPledges || selectedCandidate.pledges).map((pledge, pIdx) => (
                     <li key={pIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '0.95rem', color: '#1e293b', background: '#f8fafc', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid #e2e8f0' }}>
                       <CheckCircle2 size={20} style={{ color: selectedCandidate.color, flexShrink: 0, marginTop: '2px' }} />
                       <span>{pledge}</span>
@@ -707,7 +982,7 @@ export default function ManifestoPage() {
             <span style={{ color: '#ffffff', fontWeight: 700 }}>NMS Class of 2008 Set Chairman Election</span>
           </div>
           <p style={{ color: 'rgba(255, 255, 255, 0.6)', margin: 0 }}>
-            Official Democratic Portal & Electoral Committee 2026. All Rights Reserved.
+            powered by Trinity Vote 2026. All Rights Reserved.
           </p>
           <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
             <a href="/login" style={{ color: '#6ee7b7' }}>Voter Login</a>
