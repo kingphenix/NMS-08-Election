@@ -9,7 +9,7 @@ import logo from '../assets/slogo@2x.png'
 
 const TOTAL_VOTES = 6
 const MAX_CANDIDATES = 3
-const MAX_VOTES_PER_CANDIDATE = TOTAL_VOTES - 1 // 5 (Voters cannot cast all 6 votes to one candidate)
+const MAX_VOTES_PER_CANDIDATE = 4 // Maximum 4 votes per candidate
 
 interface Candidate {
   id: string
@@ -35,8 +35,8 @@ export default function VotingPage() {
 
   const totalAllocated = Object.values(allocation).reduce((s, v) => s + v, 0)
   const remaining = TOTAL_VOTES - totalAllocated
-  const hasSingleCandidateAllVotes = Object.values(allocation).some(v => v >= TOTAL_VOTES)
-  const isValid = selected.size >= 2 && totalAllocated === TOTAL_VOTES && !hasSingleCandidateAllVotes
+  const hasCandidateExceedingMax = Object.values(allocation).some(v => v > MAX_VOTES_PER_CANDIDATE)
+  const isValid = selected.size >= 2 && totalAllocated === TOTAL_VOTES && !hasCandidateExceedingMax
 
   // Fetch candidates from Supabase (public read via RLS) with fallback
   useEffect(() => {
@@ -121,7 +121,7 @@ export default function VotingPage() {
       // Can't go below 1
       if (newVal < 1) return prev
 
-      // Can't cast all 6 votes to one candidate (max 5 votes per candidate)
+      // Can't give more than 4 votes to any single candidate (max 4 votes per candidate)
       if (newVal > MAX_VOTES_PER_CANDIDATE) return prev
 
       // Can't exceed remaining budget
@@ -192,7 +192,7 @@ export default function VotingPage() {
             </div>
             <p style={{ color: 'rgba(255,255,255,0.75)', margin: 0 }}>
               Select <strong style={{ color: '#ffffff' }}>2 to {MAX_CANDIDATES} candidates</strong> and
-              distribute exactly <strong style={{ color: '#6ee7b7' }}>{TOTAL_VOTES} votes</strong> between them (maximum 5 votes per candidate).
+              distribute exactly <strong style={{ color: '#6ee7b7' }}>{TOTAL_VOTES} votes</strong> between them (maximum 4 votes per candidate).
             </p>
           </motion.div>
         </div>
@@ -204,6 +204,33 @@ export default function VotingPage() {
       {/* Main content */}
       <div style={{ padding: 'var(--sp-6) var(--sp-4)' }}>
         <div className="max-w-xl">
+
+          {/* Vote Rule Announcement / Write-Up */}
+          <motion.div
+            style={{
+              background: 'rgba(6, 78, 59, 0.4)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              borderRadius: 'var(--radius-lg)',
+              padding: 'var(--sp-4) var(--sp-5)',
+              marginBottom: 'var(--sp-5)',
+              backdropFilter: 'blur(8px)',
+            }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-3)' }}>
+              <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>📢</span>
+              <div>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#6ee7b7', margin: '0 0 var(--sp-1) 0' }}>
+                  Important Voting Rule
+                </h3>
+                <p style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.85)', margin: 0, lineHeight: 1.5 }}>
+                  The maximum number of votes you can assign to any candidate is <strong>4 votes</strong>. You have <strong>6 total votes</strong> to distribute across at least <strong>2 candidates</strong>.
+                </p>
+              </div>
+            </div>
+          </motion.div>
 
           {/* Vote Counter */}
           <motion.div
@@ -395,7 +422,7 @@ export default function VotingPage() {
                   ? 'Voters cannot cast all votes to one person. Select at least 2 candidates.'
                   : totalAllocated < TOTAL_VOTES
                     ? `Allocate all ${TOTAL_VOTES} votes across your candidates. ${remaining} remaining.`
-                    : 'Maximum 5 votes per candidate permitted.'
+                    : 'Maximum 4 votes per candidate permitted.'
                 }
               </p>
             )}

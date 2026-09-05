@@ -978,7 +978,7 @@ export default function ManifestoPage() {
               <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#6ee7b7', marginBottom: 'var(--sp-2)' }}>03</div>
               <h3 style={{ color: '#ffffff', marginBottom: 'var(--sp-2)' }}>Allocate 6 Votes</h3>
               <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.75)' }}>
-                Choose 1 to 3 candidates and distribute your 6 votes between them according to preference.
+                Choose 2 to 3 candidates and distribute your 6 votes between them according to preference (max 4 votes per candidate).
               </p>
             </div>
           </div>

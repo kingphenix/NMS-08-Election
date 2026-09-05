@@ -13,6 +13,7 @@ const corsHeaders = {
 
 const TOTAL_VOTES_REQUIRED = 6;
 const MAX_CANDIDATES = 3;
+const MAX_VOTES_PER_CANDIDATE = 4;
 
 interface BallotEntry {
   candidate_id: string;
@@ -107,8 +108,8 @@ serve(async (req: Request) => {
 });
 
 function validateBallot(ballot: BallotEntry[]): string | null {
-  if (!Array.isArray(ballot) || ballot.length === 0) {
-    return "You must select at least 1 candidate.";
+  if (!Array.isArray(ballot) || ballot.length < 2) {
+    return "You must select at least 2 candidates.";
   }
   if (ballot.length > MAX_CANDIDATES) {
     return `You may select at most ${MAX_CANDIDATES} candidates.`;
@@ -121,8 +122,8 @@ function validateBallot(ballot: BallotEntry[]): string | null {
   }
 
   for (const entry of ballot) {
-    if (!Number.isInteger(entry.votes_given) || entry.votes_given < 1 || entry.votes_given > 6) {
-      return `votes_given must be an integer between 1 and 6.`;
+    if (!Number.isInteger(entry.votes_given) || entry.votes_given < 1 || entry.votes_given > MAX_VOTES_PER_CANDIDATE) {
+      return `votes_given must be an integer between 1 and ${MAX_VOTES_PER_CANDIDATE}.`;
     }
     if (!entry.candidate_id || typeof entry.candidate_id !== "string") {
       return "Invalid candidate_id.";
