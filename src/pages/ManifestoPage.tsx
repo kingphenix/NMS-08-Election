@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import logo from '../assets/nms-new-logo.webp'
+import alphaCandidateImg from '../assets/images/Alpha Company.jpeg'
 import bravoCandidateImg from '../assets/images/Bravo Company Candidate.jpeg'
 import charlieCandidateImg from '../assets/images/Charlie Company Candidate.jpeg'
 import deltaCandidateImg from '../assets/images/Delta Company Candidate.jpeg'
@@ -36,6 +37,36 @@ const LOREM_FULL_MANIFESTO = [
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla.',
   'Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. Pellentesque nibh. Aenean quam. In scelerisque sem at multo elit. Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor.',
   'Morbi lectus risus, porta vel, pharetra dui, sed, pellentesque at, eros. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra.'
+]
+
+/* ── Alpha Company Candidate Official Manifesto Data (Sende Kaun Jeffrey Myles) ── */
+const ALPHA_TAGLINE = 'Brotherhood. Network. One Purpose.'
+
+const ALPHA_BIO =
+  '“We entered as boys. We stand today as men. What binds us is not distance, titles or success—it is the brotherhood we earned.” I am not asking for your vote to occupy a seat. I am asking for your trust to strengthen what already belongs to all of us.'
+
+const ALPHA_CARD_PLEDGES = [
+  'Protect the Brotherhood: Every Exboy matters. Every voice deserves to be heard.',
+  'Build the Network: Turn our connections into opportunities for careers, business, mentorship and support.',
+  'Lead with Purpose: Transparent leadership, active communication and decisions that serve the entire set.',
+  'Create Lasting Value: An NMS ’08 that becomes more useful to every member with each passing year.'
+]
+
+const ALPHA_FULL_MANIFESTO = [
+  'Brotherhood. Network. One Purpose. Sende Kaun Jeffrey Myles (08/6478) — Alpha Company Candidate for Chairman, NMS ’08.',
+  '“We entered as boys. We stand today as men. What binds us is not distance, titles or success—it is the brotherhood we earned.” I am not asking for your vote to occupy a seat. I am asking for your trust to strengthen what already belongs to all of us.',
+  'My Commitment: (1) Protect the Brotherhood — Every Exboy matters. Every voice deserves to be heard. (2) Build the Network — Turn our connections into opportunities for careers, business, mentorship and support.',
+  'My Commitment: (3) Lead with Purpose — Transparent leadership, active communication and decisions that serve the entire set. (4) Create Lasting Value — An NMS ’08 that becomes more useful to every member with each passing year.',
+  'The Alpha Principle: At Alpha, we learned that leadership is earned by showing up, carrying others when necessary, and finishing together. That is the spirit I bring to this office. No empty promises. No unnecessary noise. Just deliberate action for the set we proudly call home. — Vote 08/6478 Sende Kaun Jeffrey Myles (Alpha Company Candidate | NMS ’08)'
+]
+
+export const ALPHA_FULL_PLEDGES = [
+  'Protect the Brotherhood — Ensure every Exboy matters and every voice deserves to be heard.',
+  'Build the Network — Turn our connections into opportunities for careers, business, mentorship and support.',
+  'Lead with Purpose — Maintain transparent leadership, active communication and decisions that serve the entire set.',
+  'Create Lasting Value — Build an NMS ’08 that becomes more useful to every member with each passing year.',
+  'Embody The Alpha Principle — Demonstrate leadership earned by showing up, carrying others when necessary, and finishing together.',
+  'Deliver Deliberate Action — Lead with no empty promises and no unnecessary noise, taking action for the set we proudly call home.'
 ]
 
 /* ── Bravo Company Candidate Official Manifesto Data ── */
@@ -268,7 +299,7 @@ interface CompanyCandidate {
 }
 
 const COMPANY_CANDIDATES: CompanyCandidate[] = [
-  { name: 'Alpha Company Candidate', company: 'Alpha Company Candidate', color: '#2563eb' },                                   /* Blue */
+  { name: 'Sende Kaun Jeffrey Myles', company: 'Alpha Company Candidate', color: '#2563eb', photoUrl: alphaCandidateImg },   /* Blue */
   { name: 'Bravo Company Candidate', company: 'Bravo Company Candidate', color: '#ca8a04', photoUrl: bravoCandidateImg },   /* Yellow */
   { name: 'Charlie Company Candidate', company: 'Charlie Company Candidate', color: '#dc2626', photoUrl: charlieCandidateImg }, /* Red */
   { name: 'Delta Company Candidate', company: 'Delta Company Candidate', color: '#16a34a', photoUrl: deltaCandidateImg },   /* Green */
@@ -278,6 +309,7 @@ const COMPANY_CANDIDATES: CompanyCandidate[] = [
 ]
 
 const getCandidatePhotoUrl = (name: string): string | undefined => {
+  if (name.includes('Alpha') || name.includes('Sende') || name.includes('Kaun') || name.includes('Jeffrey') || name.includes('Myles')) return alphaCandidateImg
   if (name.includes('Bravo')) return bravoCandidateImg
   if (name.includes('Charlie')) return charlieCandidateImg
   if (name.includes('Delta')) return deltaCandidateImg
@@ -289,6 +321,7 @@ const getCandidatePhotoUrl = (name: string): string | undefined => {
 
 
 const INITIAL_CANDIDATES: CandidateInfo[] = COMPANY_CANDIDATES.map((comp, idx) => {
+  const isAlpha = comp.company.includes('Alpha')
   const isBravo = comp.company.includes('Bravo')
   const isCharlie = comp.company.includes('Charlie')
   const isDelta = comp.company.includes('Delta')
@@ -301,11 +334,11 @@ const INITIAL_CANDIDATES: CandidateInfo[] = COMPANY_CANDIDATES.map((comp, idx) =
     company: comp.company,
     color: comp.color,
     photoUrl: comp.photoUrl,
-    tagline: isBravo ? BRAVO_TAGLINE : isCharlie ? CHARLIE_TAGLINE : isDelta ? DELTA_TAGLINE : isEcho ? ECHO_TAGLINE : isFoxtrot ? FOXTROT_TAGLINE : isGolf ? GOLF_TAGLINE : LOREM_TAGLINE,
-    bio: isBravo ? BRAVO_BIO : isCharlie ? CHARLIE_BIO : isDelta ? DELTA_BIO : isEcho ? ECHO_BIO : isFoxtrot ? FOXTROT_BIO : isGolf ? GOLF_BIO : LOREM_BIO,
-    pledges: isBravo ? BRAVO_CARD_PLEDGES : isCharlie ? CHARLIE_CARD_PLEDGES : isDelta ? DELTA_CARD_PLEDGES : isEcho ? ECHO_CARD_PLEDGES : isFoxtrot ? FOXTROT_CARD_PLEDGES : isGolf ? GOLF_CARD_PLEDGES : LOREM_PLEDGES,
-    fullManifesto: isBravo ? BRAVO_FULL_MANIFESTO : isCharlie ? CHARLIE_FULL_MANIFESTO : isDelta ? DELTA_FULL_MANIFESTO : isEcho ? ECHO_FULL_MANIFESTO : isFoxtrot ? FOXTROT_FULL_MANIFESTO : isGolf ? GOLF_FULL_MANIFESTO : LOREM_FULL_MANIFESTO,
-    fullPledges: isBravo ? BRAVO_FULL_PLEDGES : isCharlie ? CHARLIE_FULL_PLEDGES : isDelta ? DELTA_FULL_PLEDGES : isEcho ? ECHO_FULL_PLEDGES : isFoxtrot ? FOXTROT_FULL_PLEDGES : isGolf ? GOLF_FULL_PLEDGES : undefined
+    tagline: isAlpha ? ALPHA_TAGLINE : isBravo ? BRAVO_TAGLINE : isCharlie ? CHARLIE_TAGLINE : isDelta ? DELTA_TAGLINE : isEcho ? ECHO_TAGLINE : isFoxtrot ? FOXTROT_TAGLINE : isGolf ? GOLF_TAGLINE : LOREM_TAGLINE,
+    bio: isAlpha ? ALPHA_BIO : isBravo ? BRAVO_BIO : isCharlie ? CHARLIE_BIO : isDelta ? DELTA_BIO : isEcho ? ECHO_BIO : isFoxtrot ? FOXTROT_BIO : isGolf ? GOLF_BIO : LOREM_BIO,
+    pledges: isAlpha ? ALPHA_CARD_PLEDGES : isBravo ? BRAVO_CARD_PLEDGES : isCharlie ? CHARLIE_CARD_PLEDGES : isDelta ? DELTA_CARD_PLEDGES : isEcho ? ECHO_CARD_PLEDGES : isFoxtrot ? FOXTROT_CARD_PLEDGES : isGolf ? GOLF_CARD_PLEDGES : LOREM_PLEDGES,
+    fullManifesto: isAlpha ? ALPHA_FULL_MANIFESTO : isBravo ? BRAVO_FULL_MANIFESTO : isCharlie ? CHARLIE_FULL_MANIFESTO : isDelta ? DELTA_FULL_MANIFESTO : isEcho ? ECHO_FULL_MANIFESTO : isFoxtrot ? FOXTROT_FULL_MANIFESTO : isGolf ? GOLF_FULL_MANIFESTO : LOREM_FULL_MANIFESTO,
+    fullPledges: isAlpha ? ALPHA_FULL_PLEDGES : isBravo ? BRAVO_FULL_PLEDGES : isCharlie ? CHARLIE_FULL_PLEDGES : isDelta ? DELTA_FULL_PLEDGES : isEcho ? ECHO_FULL_PLEDGES : isFoxtrot ? FOXTROT_FULL_PLEDGES : isGolf ? GOLF_FULL_PLEDGES : undefined
   }
 })
 
@@ -351,6 +384,7 @@ export default function ManifestoPage() {
           const mapped = COMPANY_CANDIDATES.map((comp, idx) => {
             const dbCandidate = res.data![idx]
             const name = dbCandidate?.name || comp.name
+            const isAlpha = comp.company.includes('Alpha') || name.includes('Alpha') || name.includes('Sende') || name.includes('Kaun') || name.includes('Jeffrey') || name.includes('Myles')
             const isBravo = comp.company.includes('Bravo') || name.includes('Bravo')
             const isCharlie = comp.company.includes('Charlie') || name.includes('Charlie')
             const isDelta = comp.company.includes('Delta') || name.includes('Delta') || name.includes('Filani') || name.includes('Victor')
@@ -363,11 +397,11 @@ export default function ManifestoPage() {
               company: comp.company,
               color: comp.color,
               photoUrl: comp.photoUrl || getCandidatePhotoUrl(name) || getCandidatePhotoUrl(comp.company),
-              tagline: isBravo ? BRAVO_TAGLINE : isCharlie ? CHARLIE_TAGLINE : isDelta ? DELTA_TAGLINE : isEcho ? ECHO_TAGLINE : isFoxtrot ? FOXTROT_TAGLINE : isGolf ? GOLF_TAGLINE : LOREM_TAGLINE,
-              bio: isBravo ? BRAVO_BIO : isCharlie ? CHARLIE_BIO : isDelta ? DELTA_BIO : isEcho ? ECHO_BIO : isFoxtrot ? FOXTROT_BIO : isGolf ? GOLF_BIO : LOREM_BIO,
-              pledges: isBravo ? BRAVO_CARD_PLEDGES : isCharlie ? CHARLIE_CARD_PLEDGES : isDelta ? DELTA_CARD_PLEDGES : isEcho ? ECHO_CARD_PLEDGES : isFoxtrot ? FOXTROT_CARD_PLEDGES : isGolf ? GOLF_CARD_PLEDGES : LOREM_PLEDGES,
-              fullManifesto: isBravo ? BRAVO_FULL_MANIFESTO : isCharlie ? CHARLIE_FULL_MANIFESTO : isDelta ? DELTA_FULL_MANIFESTO : isEcho ? ECHO_FULL_MANIFESTO : isFoxtrot ? FOXTROT_FULL_MANIFESTO : isGolf ? GOLF_FULL_MANIFESTO : LOREM_FULL_MANIFESTO,
-              fullPledges: isBravo ? BRAVO_FULL_PLEDGES : isCharlie ? CHARLIE_FULL_PLEDGES : isDelta ? DELTA_FULL_PLEDGES : isEcho ? ECHO_FULL_PLEDGES : isFoxtrot ? FOXTROT_FULL_PLEDGES : isGolf ? GOLF_FULL_PLEDGES : undefined
+              tagline: isAlpha ? ALPHA_TAGLINE : isBravo ? BRAVO_TAGLINE : isCharlie ? CHARLIE_TAGLINE : isDelta ? DELTA_TAGLINE : isEcho ? ECHO_TAGLINE : isFoxtrot ? FOXTROT_TAGLINE : isGolf ? GOLF_TAGLINE : LOREM_TAGLINE,
+              bio: isAlpha ? ALPHA_BIO : isBravo ? BRAVO_BIO : isCharlie ? CHARLIE_BIO : isDelta ? DELTA_BIO : isEcho ? ECHO_BIO : isFoxtrot ? FOXTROT_BIO : isGolf ? GOLF_BIO : LOREM_BIO,
+              pledges: isAlpha ? ALPHA_CARD_PLEDGES : isBravo ? BRAVO_CARD_PLEDGES : isCharlie ? CHARLIE_CARD_PLEDGES : isDelta ? DELTA_CARD_PLEDGES : isEcho ? ECHO_CARD_PLEDGES : isFoxtrot ? FOXTROT_CARD_PLEDGES : isGolf ? GOLF_CARD_PLEDGES : LOREM_PLEDGES,
+              fullManifesto: isAlpha ? ALPHA_FULL_MANIFESTO : isBravo ? BRAVO_FULL_MANIFESTO : isCharlie ? CHARLIE_FULL_MANIFESTO : isDelta ? DELTA_FULL_MANIFESTO : isEcho ? ECHO_FULL_MANIFESTO : isFoxtrot ? FOXTROT_FULL_MANIFESTO : isGolf ? GOLF_FULL_MANIFESTO : LOREM_FULL_MANIFESTO,
+              fullPledges: isAlpha ? ALPHA_FULL_PLEDGES : isBravo ? BRAVO_FULL_PLEDGES : isCharlie ? CHARLIE_FULL_PLEDGES : isDelta ? DELTA_FULL_PLEDGES : isEcho ? ECHO_FULL_PLEDGES : isFoxtrot ? FOXTROT_FULL_PLEDGES : isGolf ? GOLF_FULL_PLEDGES : undefined
             }
           })
           setCandidates(mapped)

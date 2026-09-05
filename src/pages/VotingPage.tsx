@@ -9,6 +9,7 @@ import logo from '../assets/slogo@2x.png'
 
 const TOTAL_VOTES = 6
 const MAX_CANDIDATES = 3
+const MAX_VOTES_PER_CANDIDATE = TOTAL_VOTES - 1 // 5 (Voters cannot cast all 6 votes to one candidate)
 
 interface Candidate {
   id: string
@@ -30,16 +31,18 @@ export default function VotingPage() {
   const [shakingId, setShakingId] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   const totalAllocated = Object.values(allocation).reduce((s, v) => s + v, 0)
   const remaining = TOTAL_VOTES - totalAllocated
-  const isValid = selected.size >= 1 && totalAllocated === TOTAL_VOTES
+  const hasSingleCandidateAllVotes = Object.values(allocation).some(v => v >= TOTAL_VOTES)
+  const isValid = selected.size >= 2 && totalAllocated === TOTAL_VOTES && !hasSingleCandidateAllVotes
 
   // Fetch candidates from Supabase (public read via RLS) with fallback
   useEffect(() => {
     let mounted = true
     const fallbackCandidates: Candidate[] = [
-      { id: 'c-1', name: 'Alpha Company Candidate' },
+      { id: 'c-1', name: 'Sende Kaun Jeffrey Myles (Alpha Coy)' },
       { id: 'c-2', name: 'Bravo Company Candidate' },
       { id: 'c-3', name: 'Charlie Company Candidate' },
       { id: 'c-4', name: 'Delta Company Candidate' },
@@ -118,6 +121,9 @@ export default function VotingPage() {
       // Can't go below 1
       if (newVal < 1) return prev
 
+      // Can't cast all 6 votes to one candidate (max 5 votes per candidate)
+      if (newVal > MAX_VOTES_PER_CANDIDATE) return prev
+
       // Can't exceed remaining budget
       const otherTotal = Object.entries(prev)
         .filter(([id]) => id !== candidateId)
@@ -129,7 +135,13 @@ export default function VotingPage() {
     })
   }, [])
 
-  const handleSubmit = async () => {
+  const handleOpenConfirm = () => {
+    if (!isValid) return
+    setSubmitError(null)
+    setShowConfirmModal(true)
+  }
+
+  const handleFinalSubmit = async () => {
     if (!isValid || submitting || !session) return
     setSubmitting(true)
     setSubmitError(null)
@@ -179,8 +191,8 @@ export default function VotingPage() {
               <h1 style={{ color: '#ffffff', margin: 0 }}>Cast Your Ballot</h1>
             </div>
             <p style={{ color: 'rgba(255,255,255,0.75)', margin: 0 }}>
-              Select <strong style={{ color: '#ffffff' }}>1 to {MAX_CANDIDATES} candidates</strong> and
-              distribute exactly <strong style={{ color: '#6ee7b7' }}>{TOTAL_VOTES} votes</strong> between them.
+              Select <strong style={{ color: '#ffffff' }}>2 to {MAX_CANDIDATES} candidates</strong> and
+              distribute exactly <strong style={{ color: '#6ee7b7' }}>{TOTAL_VOTES} votes</strong> between them (maximum 5 votes per candidate).
             </p>
           </motion.div>
         </div>
@@ -226,7 +238,11 @@ export default function VotingPage() {
               </div>
             </div>
             {totalAllocated === TOTAL_VOTES ? (
-              <div className="badge badge-success" style={{ fontSize: '1rem', padding: '6px 14px' }}>✓ Ready</div>
+              selected.size >= 2 ? (
+                <div className="badge badge-success" style={{ fontSize: '1rem', padding: '6px 14px' }}>✓ Ready</div>
+              ) : (
+                <div className="badge badge-warning" style={{ fontSize: '0.85rem', padding: '6px 10px' }}>⚠️ 2+ Candidates Needed</div>
+              )
             ) : (
               <div className="badge badge-muted">
                 {remaining > 0 ? `${remaining} left` : 'Over limit'}
@@ -333,7 +349,7 @@ export default function VotingPage() {
                             <button
                               className="stepper-btn"
                               onClick={() => adjustVote(candidate.id, 1)}
-                              disabled={remaining <= 0}
+                              disabled={votes >= MAX_VOTES_PER_CANDIDATE || remaining <= 0}
                               aria-label={`Increase votes for ${candidate.name}`}
                             >+</button>
                           </motion.div>
@@ -348,7 +364,7 @@ export default function VotingPage() {
 
           {/* Error */}
           <AnimatePresence>
-            {submitError && (
+            {submitError && !showConfirmModal && (
               <motion.div
                 className="alert alert-error"
                 style={{ marginTop: 'var(--sp-6)' }}
@@ -362,26 +378,24 @@ export default function VotingPage() {
             )}
           </AnimatePresence>
 
-          {/* Submit button — always visible at the bottom */}
+          {/* Submit button — triggers modal */}
           <div style={{ marginTop: 'var(--sp-8)' }}>
             <button
               id="submit-ballot-btn"
               className="btn btn-primary btn--full"
               style={{ fontSize: '1rem', padding: '14px 24px' }}
-              onClick={handleSubmit}
+              onClick={handleOpenConfirm}
               disabled={!isValid || submitting}
             >
-              {submitting ? (
-                <><span className="spinner" />Submitting…</>
-              ) : (
-                'Submit My Votes'
-              )}
+              Submit My Votes
             </button>
             {!isValid && (
               <p className="text-center text-xs text-subtle" style={{ marginTop: 'var(--sp-2)' }}>
-                {selected.size === 0
-                  ? 'Select at least one candidate to continue.'
-                  : `Allocate all ${TOTAL_VOTES} votes to enable submission. ${remaining} remaining.`
+                {selected.size < 2
+                  ? 'Voters cannot cast all votes to one person. Select at least 2 candidates.'
+                  : totalAllocated < TOTAL_VOTES
+                    ? `Allocate all ${TOTAL_VOTES} votes across your candidates. ${remaining} remaining.`
+                    : 'Maximum 5 votes per candidate permitted.'
                 }
               </p>
             )}
@@ -389,6 +403,145 @@ export default function VotingPage() {
 
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 9999,
+              background: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(6px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 'var(--sp-4)',
+            }}
+            onClick={() => { if (!submitting) setShowConfirmModal(false) }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              style={{
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-xl)',
+                padding: 'var(--sp-6)',
+                width: '100%',
+                maxWidth: '460px',
+                boxShadow: 'var(--shadow-xl)',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div style={{ textAlign: 'center', marginBottom: 'var(--sp-5)' }}>
+                <div style={{
+                  fontSize: '2.5rem',
+                  marginBottom: 'var(--sp-2)',
+                  lineHeight: 1
+                }}>
+                  🗳️
+                </div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 var(--sp-1) 0', color: 'var(--color-text)' }}>
+                  Confirm Your Ballot
+                </h2>
+                <p className="text-sm text-muted" style={{ margin: 0 }}>
+                  Please review your vote distribution before final submission. This action cannot be undone.
+                </p>
+              </div>
+
+              {/* Selected Candidates Summary */}
+              <div style={{
+                background: 'rgba(0, 0, 0, 0.25)',
+                borderRadius: 'var(--radius-lg)',
+                padding: 'var(--sp-4)',
+                marginBottom: 'var(--sp-5)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--sp-3)',
+                border: '1px solid rgba(255, 255, 255, 0.08)'
+              }}>
+                {Array.from(selected).map(candidateId => {
+                  const candidate = candidates.find(c => c.id === candidateId)
+                  const votes = allocation[candidateId] || 0
+                  return (
+                    <div
+                      key={candidateId}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: 'var(--sp-2) 0',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                      }}
+                    >
+                      <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>
+                        {candidate?.name || candidateId}
+                      </div>
+                      <div className="badge badge-success" style={{ fontWeight: 700, padding: '4px 10px' }}>
+                        {votes} vote{votes !== 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  )
+                })}
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingTop: 'var(--sp-2)',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  color: 'var(--color-primary)'
+                }}>
+                  <span>Total Allocated:</span>
+                  <span>{totalAllocated} / {TOTAL_VOTES} Votes</span>
+                </div>
+              </div>
+
+              {/* Error message inside modal */}
+              {submitError && (
+                <div className="alert alert-error" style={{ marginBottom: 'var(--sp-4)' }}>
+                  <span>⚠️</span>
+                  <span>{submitError}</span>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div style={{ display: 'flex', gap: 'var(--sp-3)' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ flex: 1 }}
+                  onClick={() => setShowConfirmModal(false)}
+                  disabled={submitting}
+                >
+                  Go Back & Edit
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ flex: 1.2 }}
+                  onClick={handleFinalSubmit}
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <><span className="spinner" />Submitting…</>
+                  ) : (
+                    'Confirm & Submit'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
