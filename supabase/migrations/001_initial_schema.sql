@@ -43,7 +43,7 @@ CREATE TABLE ballots (
   id            UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   credential_id UUID        NOT NULL REFERENCES voter_credentials(id),
   candidate_id  UUID        NOT NULL REFERENCES candidates(id),
-  votes_given   INTEGER     NOT NULL CHECK (votes_given >= 1 AND votes_given <= 6),
+  votes_given   INTEGER     NOT NULL CHECK (votes_given >= 1 AND votes_given <= 3),
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
 
   -- Prevent a credential from voting for the same candidate twice

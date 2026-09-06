@@ -13,7 +13,7 @@ const corsHeaders = {
 
 const TOTAL_VOTES_REQUIRED = 6;
 const MAX_CANDIDATES = 3;
-const MAX_VOTES_PER_CANDIDATE = 4;
+const MAX_VOTES_PER_CANDIDATE = 3;
 
 interface BallotEntry {
   candidate_id: string;

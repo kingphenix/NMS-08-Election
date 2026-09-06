@@ -9,7 +9,7 @@ import logo from '../assets/slogo@2x.png'
 
 const TOTAL_VOTES = 6
 const MAX_CANDIDATES = 3
-const MAX_VOTES_PER_CANDIDATE = 4 // Maximum 4 votes per candidate
+const MAX_VOTES_PER_CANDIDATE = 3 // Maximum 3 votes per candidate
 
 interface Candidate {
   id: string
@@ -121,7 +121,7 @@ export default function VotingPage() {
       // Can't go below 1
       if (newVal < 1) return prev
 
-      // Can't give more than 4 votes to any single candidate (max 4 votes per candidate)
+      // Can't give more than 3 votes to any single candidate (max 3 votes per candidate)
       if (newVal > MAX_VOTES_PER_CANDIDATE) return prev
 
       // Can't exceed remaining budget
@@ -192,7 +192,7 @@ export default function VotingPage() {
             </div>
             <p style={{ color: 'rgba(255,255,255,0.75)', margin: 0 }}>
               Select <strong style={{ color: '#ffffff' }}>2 to {MAX_CANDIDATES} candidates</strong> and
-              distribute exactly <strong style={{ color: '#6ee7b7' }}>{TOTAL_VOTES} votes</strong> between them (maximum 4 votes per candidate).
+              distribute exactly <strong style={{ color: '#6ee7b7' }}>{TOTAL_VOTES} votes</strong> between them (maximum 3 votes per candidate).
             </p>
           </motion.div>
         </div>
@@ -226,7 +226,7 @@ export default function VotingPage() {
                   Important Voting Rule
                 </h3>
                 <p style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.85)', margin: 0, lineHeight: 1.5 }}>
-                  The maximum number of votes you can assign to any candidate is <strong>4 votes</strong>. You have <strong>6 total votes</strong> to distribute across at least <strong>2 candidates</strong>.
+                  The maximum number of votes you can assign to any candidate is <strong>3 votes</strong>. You have <strong>6 total votes</strong> to distribute across at least <strong>2 candidates</strong>.
                 </p>
               </div>
             </div>
@@ -422,7 +422,7 @@ export default function VotingPage() {
                   ? 'Voters cannot cast all votes to one person. Select at least 2 candidates.'
                   : totalAllocated < TOTAL_VOTES
                     ? `Allocate all ${TOTAL_VOTES} votes across your candidates. ${remaining} remaining.`
-                    : 'Maximum 4 votes per candidate permitted.'
+                    : 'Maximum 3 votes per candidate permitted.'
                 }
               </p>
             )}
