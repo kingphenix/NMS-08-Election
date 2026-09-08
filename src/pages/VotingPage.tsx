@@ -85,6 +85,15 @@ export default function VotingPage() {
   }, [])
 
   const toggleCandidate = useCallback((id: string) => {
+    const candIndex = candidates.findIndex(c => c.id === id)
+    const cand = candidates[candIndex]
+    if (cand) {
+      const n = cand.name.toLowerCase()
+      if (n.includes('charlie') || n.includes('josiah') || n.includes('yerima') || cand.id === 'c-3' || candIndex === 2) {
+        return
+      }
+    }
+
     setSelected(prev => {
       if (prev.has(id)) {
         // Deselect: remove allocation
@@ -111,7 +120,7 @@ export default function VotingPage() {
       setAllocation(a => ({ ...a, [id]: 1 }))
       return next
     })
-  }, [])
+  }, [candidates])
 
   const adjustVote = useCallback((candidateId: string, delta: number) => {
     setAllocation(prev => {
@@ -296,6 +305,8 @@ export default function VotingPage() {
           {/* Candidate Grid */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
             {candidates.map((candidate, i) => {
+              const nameLower = candidate.name.toLowerCase()
+              const isWithdrawn = nameLower.includes('charlie') || nameLower.includes('josiah') || nameLower.includes('yerima') || candidate.id === 'c-3' || i === 2
               const isSelected = selected.has(candidate.id)
               const votes = allocation[candidate.id] ?? 0
               const isShaking = shakingId === candidate.id
@@ -309,18 +320,22 @@ export default function VotingPage() {
                   transition={{ delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <div
-                    onClick={() => toggleCandidate(candidate.id)}
+                    onClick={() => !isWithdrawn && toggleCandidate(candidate.id)}
                     style={{
-                      background: isSelected
-                        ? 'linear-gradient(135deg, rgba(6,78,59,0.12) 0%, rgba(0,69,38,0.06) 100%)'
-                        : 'var(--color-surface)',
-                      border: `1px solid ${isSelected ? 'rgba(0,69,38,0.5)' : 'var(--color-border)'}`,
+                      background: isWithdrawn
+                        ? 'rgba(255, 255, 255, 0.03)'
+                        : isSelected
+                          ? 'linear-gradient(135deg, rgba(6,78,59,0.12) 0%, rgba(0,69,38,0.06) 100%)'
+                          : 'var(--color-surface)',
+                      border: `1px solid ${isWithdrawn ? 'rgba(220,38,38,0.3)' : isSelected ? 'rgba(0,69,38,0.5)' : 'var(--color-border)'}`,
                       borderRadius: 'var(--radius-lg)',
                       padding: 'var(--sp-4)',
-                      cursor: 'pointer',
+                      cursor: isWithdrawn ? 'not-allowed' : 'pointer',
                       transition: 'all var(--transition-normal)',
                       boxShadow: isSelected ? 'var(--shadow-glow)' : 'none',
                       userSelect: 'none',
+                      opacity: isWithdrawn ? 0.55 : 1,
+                      position: 'relative'
                     }}
                   >
                     <div className="flex items-center justify-between">
@@ -328,19 +343,51 @@ export default function VotingPage() {
                         <div style={{
                           width: 40, height: 40,
                           borderRadius: 'var(--radius-full)',
-                          background: isSelected ? 'var(--gradient-primary)' : 'rgba(255,255,255,0.06)',
-                          border: `2px solid ${isSelected ? 'transparent' : 'var(--color-border)'}`,
+                          background: isWithdrawn
+                            ? '#dc2626'
+                            : isSelected ? 'var(--gradient-primary)' : 'rgba(255,255,255,0.06)',
+                          border: `2px solid ${isWithdrawn ? 'transparent' : isSelected ? 'transparent' : 'var(--color-border)'}`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontWeight: 700, fontSize: '0.875rem',
-                          color: isSelected ? 'white' : 'var(--color-text-muted)',
+                          color: 'white',
                           flexShrink: 0,
                           transition: 'all var(--transition-normal)',
                         }}>
-                          {isSelected ? '✓' : i + 1}
+                          {isWithdrawn ? '🚫' : isSelected ? '✓' : i + 1}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: '1rem' }}>{candidate.name}</div>
-                          {isSelected && (
+                          <div style={{
+                            fontWeight: 600,
+                            fontSize: '1rem',
+                            color: isWithdrawn ? 'var(--color-text-muted)' : 'var(--color-text)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            flexWrap: 'wrap'
+                          }}>
+                            <span style={{ textDecoration: isWithdrawn ? 'line-through' : 'none' }}>
+                              {candidate.name}
+                            </span>
+                            {isWithdrawn && (
+                              <span style={{
+                                fontSize: '0.8rem',
+                                color: '#ef4444',
+                                fontWeight: 700,
+                                textDecoration: 'none',
+                                background: 'rgba(239, 68, 68, 0.15)',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                border: '1px solid rgba(239, 68, 68, 0.3)'
+                              }}>
+                                (Withdrawn)
+                              </span>
+                            )}
+                          </div>
+                          {isWithdrawn ? (
+                            <div className="text-xs text-error" style={{ marginTop: 2, color: '#ef4444', fontWeight: 600 }}>
+                              Votes cannot be allocated to this candidate.
+                            </div>
+                          ) : isSelected && (
                             <div className="text-xs text-muted" style={{ marginTop: 2 }}>
                               {votes} vote{votes !== 1 ? 's' : ''} allocated
                             </div>
@@ -348,40 +395,46 @@ export default function VotingPage() {
                         </div>
                       </div>
 
-                      <AnimatePresence>
-                        {isSelected && (
-                          <motion.div
-                            className="stepper"
-                            onClick={e => e.stopPropagation()}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                          >
-                            <button
-                              className="stepper-btn"
-                              onClick={() => adjustVote(candidate.id, -1)}
-                              disabled={votes <= 1}
-                              aria-label={`Decrease votes for ${candidate.name}`}
-                            >−</button>
-                            <motion.span
-                              key={votes}
-                              className="stepper-value"
-                              initial={{ scale: 1.4 }}
-                              animate={{ scale: 1 }}
-                              transition={{ type: 'spring', stiffness: 600 }}
+                      {isWithdrawn ? (
+                        <div className="badge" style={{ background: '#dc2626', color: '#ffffff', fontWeight: 700, padding: '4px 10px', fontSize: '0.75rem' }}>
+                          WITHDRAWN
+                        </div>
+                      ) : (
+                        <AnimatePresence>
+                          {isSelected && (
+                            <motion.div
+                              className="stepper"
+                              onClick={e => e.stopPropagation()}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.8 }}
+                              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                             >
-                              {votes}
-                            </motion.span>
-                            <button
-                              className="stepper-btn"
-                              onClick={() => adjustVote(candidate.id, 1)}
-                              disabled={votes >= MAX_VOTES_PER_CANDIDATE || remaining <= 0}
-                              aria-label={`Increase votes for ${candidate.name}`}
-                            >+</button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                              <button
+                                className="stepper-btn"
+                                onClick={() => adjustVote(candidate.id, -1)}
+                                disabled={votes <= 1}
+                                aria-label={`Decrease votes for ${candidate.name}`}
+                              >−</button>
+                              <motion.span
+                                key={votes}
+                                className="stepper-value"
+                                initial={{ scale: 1.4 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: 'spring', stiffness: 600 }}
+                              >
+                                {votes}
+                              </motion.span>
+                              <button
+                                className="stepper-btn"
+                                onClick={() => adjustVote(candidate.id, 1)}
+                                disabled={votes >= MAX_VOTES_PER_CANDIDATE || remaining <= 0}
+                                aria-label={`Increase votes for ${candidate.name}`}
+                              >+</button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      )}
                     </div>
                   </div>
                 </motion.div>

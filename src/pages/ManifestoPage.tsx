@@ -24,6 +24,7 @@ interface CandidateInfo {
   pledges: string[]
   fullManifesto?: string[]
   fullPledges?: string[]
+  isWithdrawn?: boolean
 }
 
 const LOREM_TAGLINE = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
@@ -338,7 +339,8 @@ const INITIAL_CANDIDATES: CandidateInfo[] = COMPANY_CANDIDATES.map((comp, idx) =
     bio: isAlpha ? ALPHA_BIO : isBravo ? BRAVO_BIO : isCharlie ? CHARLIE_BIO : isDelta ? DELTA_BIO : isEcho ? ECHO_BIO : isFoxtrot ? FOXTROT_BIO : isGolf ? GOLF_BIO : LOREM_BIO,
     pledges: isAlpha ? ALPHA_CARD_PLEDGES : isBravo ? BRAVO_CARD_PLEDGES : isCharlie ? CHARLIE_CARD_PLEDGES : isDelta ? DELTA_CARD_PLEDGES : isEcho ? ECHO_CARD_PLEDGES : isFoxtrot ? FOXTROT_CARD_PLEDGES : isGolf ? GOLF_CARD_PLEDGES : LOREM_PLEDGES,
     fullManifesto: isAlpha ? ALPHA_FULL_MANIFESTO : isBravo ? BRAVO_FULL_MANIFESTO : isCharlie ? CHARLIE_FULL_MANIFESTO : isDelta ? DELTA_FULL_MANIFESTO : isEcho ? ECHO_FULL_MANIFESTO : isFoxtrot ? FOXTROT_FULL_MANIFESTO : isGolf ? GOLF_FULL_MANIFESTO : LOREM_FULL_MANIFESTO,
-    fullPledges: isAlpha ? ALPHA_FULL_PLEDGES : isBravo ? BRAVO_FULL_PLEDGES : isCharlie ? CHARLIE_FULL_PLEDGES : isDelta ? DELTA_FULL_PLEDGES : isEcho ? ECHO_FULL_PLEDGES : isFoxtrot ? FOXTROT_FULL_PLEDGES : isGolf ? GOLF_FULL_PLEDGES : undefined
+    fullPledges: isAlpha ? ALPHA_FULL_PLEDGES : isBravo ? BRAVO_FULL_PLEDGES : isCharlie ? CHARLIE_FULL_PLEDGES : isDelta ? DELTA_FULL_PLEDGES : isEcho ? ECHO_FULL_PLEDGES : isFoxtrot ? FOXTROT_FULL_PLEDGES : isGolf ? GOLF_FULL_PLEDGES : undefined,
+    isWithdrawn: isCharlie
   }
 })
 
@@ -386,7 +388,7 @@ export default function ManifestoPage() {
             const name = dbCandidate?.name || comp.name
             const isAlpha = comp.company.includes('Alpha') || name.includes('Alpha') || name.includes('Sende') || name.includes('Kaun') || name.includes('Jeffrey') || name.includes('Myles')
             const isBravo = comp.company.includes('Bravo') || name.includes('Bravo')
-            const isCharlie = comp.company.includes('Charlie') || name.includes('Charlie')
+            const isCharlie = comp.company.includes('Charlie') || name.includes('Charlie') || name.includes('Josiah') || name.includes('Yerima') || idx === 2
             const isDelta = comp.company.includes('Delta') || name.includes('Delta') || name.includes('Filani') || name.includes('Victor')
             const isEcho = comp.company.includes('Echo') || name.includes('Echo') || name.includes('Ukonna') || name.includes('Ikenna')
             const isFoxtrot = comp.company.includes('Foxtrot') || name.includes('Foxtrot') || name.includes('Isah') || name.includes('Muhammad') || name.includes('Muhammed')
@@ -401,7 +403,8 @@ export default function ManifestoPage() {
               bio: isAlpha ? ALPHA_BIO : isBravo ? BRAVO_BIO : isCharlie ? CHARLIE_BIO : isDelta ? DELTA_BIO : isEcho ? ECHO_BIO : isFoxtrot ? FOXTROT_BIO : isGolf ? GOLF_BIO : LOREM_BIO,
               pledges: isAlpha ? ALPHA_CARD_PLEDGES : isBravo ? BRAVO_CARD_PLEDGES : isCharlie ? CHARLIE_CARD_PLEDGES : isDelta ? DELTA_CARD_PLEDGES : isEcho ? ECHO_CARD_PLEDGES : isFoxtrot ? FOXTROT_CARD_PLEDGES : isGolf ? GOLF_CARD_PLEDGES : LOREM_PLEDGES,
               fullManifesto: isAlpha ? ALPHA_FULL_MANIFESTO : isBravo ? BRAVO_FULL_MANIFESTO : isCharlie ? CHARLIE_FULL_MANIFESTO : isDelta ? DELTA_FULL_MANIFESTO : isEcho ? ECHO_FULL_MANIFESTO : isFoxtrot ? FOXTROT_FULL_MANIFESTO : isGolf ? GOLF_FULL_MANIFESTO : LOREM_FULL_MANIFESTO,
-              fullPledges: isAlpha ? ALPHA_FULL_PLEDGES : isBravo ? BRAVO_FULL_PLEDGES : isCharlie ? CHARLIE_FULL_PLEDGES : isDelta ? DELTA_FULL_PLEDGES : isEcho ? ECHO_FULL_PLEDGES : isFoxtrot ? FOXTROT_FULL_PLEDGES : isGolf ? GOLF_FULL_PLEDGES : undefined
+              fullPledges: isAlpha ? ALPHA_FULL_PLEDGES : isBravo ? BRAVO_FULL_PLEDGES : isCharlie ? CHARLIE_FULL_PLEDGES : isDelta ? DELTA_FULL_PLEDGES : isEcho ? ECHO_FULL_PLEDGES : isFoxtrot ? FOXTROT_FULL_PLEDGES : isGolf ? GOLF_FULL_PLEDGES : undefined,
+              isWithdrawn: isCharlie
             }
           })
           setCandidates(mapped)
@@ -629,132 +632,192 @@ export default function ManifestoPage() {
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--sp-6)' }}>
-              {filteredCandidates.map((candidate, index) => (
-                <div
-                  key={candidate.id}
-                  className="card"
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    background: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: 'var(--sp-6)',
-                    boxShadow: 'none'
-                  }}
-                >
-                  <div>
-                    {/* Candidate Picture Slot Beside Name */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-4)', marginBottom: 'var(--sp-4)' }}>
-                      {/* Circular Picture Slot (Interactive File Upload Slot) */}
-                      <label
-                        style={{
-                          width: '80px',
-                          height: '80px',
-                          borderRadius: '50%',
-                          background: '#f8fafc',
-                          border: `4px solid ${candidate.color}`,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
-                          overflow: 'hidden',
-                          cursor: 'pointer',
-                          position: 'relative'
-                        }}
-                        title="Click to slot candidate image"
-                      >
-                        <input
-                          type="file"
-                          accept="image/*"
-                          style={{ display: 'none' }}
-                          onChange={(e) => handleImageUpload(candidate.id, e)}
-                        />
-                        {candidatePhotos[candidate.id] || candidate.photoUrl ? (
-                          <img
-                            src={candidatePhotos[candidate.id] || candidate.photoUrl}
-                            alt={candidate.name}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: candidate.color }}>
-                            <Camera size={26} />
-                            <span style={{ fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                              Slot Photo
+              {filteredCandidates.map((candidate, index) => {
+                const isWithdrawn = Boolean(candidate.isWithdrawn || candidate.company.includes('Charlie') || candidate.name.toLowerCase().includes('charlie'))
+
+                return (
+                  <div
+                    key={candidate.id}
+                    className="card"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      background: isWithdrawn ? '#f8fafc' : '#ffffff',
+                      border: isWithdrawn ? '2px solid #ef4444' : '1px solid #cbd5e1',
+                      borderRadius: 'var(--radius-lg)',
+                      padding: 'var(--sp-6)',
+                      boxShadow: 'none',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    {/* Inner Content — dimmed and grayscaled when candidate has withdrawn */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        height: '100%',
+                        opacity: isWithdrawn ? 0.45 : 1,
+                        filter: isWithdrawn ? 'grayscale(85%)' : 'none',
+                        pointerEvents: isWithdrawn ? 'none' : 'auto'
+                      }}
+                    >
+                      <div>
+                        {/* Candidate Picture Slot Beside Name */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-4)', marginBottom: 'var(--sp-4)' }}>
+                          {/* Circular Picture Slot (Interactive File Upload Slot) */}
+                          <label
+                            style={{
+                              width: '80px',
+                              height: '80px',
+                              borderRadius: '50%',
+                              background: '#f8fafc',
+                              border: `4px solid ${candidate.color}`,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                              overflow: 'hidden',
+                              cursor: isWithdrawn ? 'not-allowed' : 'pointer',
+                              position: 'relative'
+                            }}
+                            title={isWithdrawn ? 'Candidate Withdrawn' : 'Click to slot candidate image'}
+                          >
+                            <input
+                              type="file"
+                              accept="image/*"
+                              style={{ display: 'none' }}
+                              disabled={isWithdrawn}
+                              onChange={(e) => handleImageUpload(candidate.id, e)}
+                            />
+                            {candidatePhotos[candidate.id] || candidate.photoUrl ? (
+                              <img
+                                src={candidatePhotos[candidate.id] || candidate.photoUrl}
+                                alt={candidate.name}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: candidate.color }}>
+                                <Camera size={26} />
+                                <span style={{ fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                                  Slot Photo
+                                </span>
+                              </div>
+                            )}
+                          </label>
+
+                          <div>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+                              {candidate.name}
+                            </h3>
+                            <span
+                              style={{
+                                fontSize: '0.85rem',
+                                color: candidate.color || COMPANY_CANDIDATES[index]?.color || '#2563eb',
+                                fontWeight: 700,
+                                letterSpacing: '0.01em',
+                                display: 'inline-block'
+                              }}
+                            >
+                              {candidate.company || COMPANY_CANDIDATES[index]?.company || `Candidate #${index + 1}`}
                             </span>
                           </div>
-                        )}
-                      </label>
+                        </div>
 
-                      <div>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#0f172a' }}>
-                          {candidate.name}
-                        </h3>
-                        <span
+                        {/* Manifesto Text */}
+                        <p style={{ fontWeight: 600, color: candidate.color, fontSize: '0.95rem', marginBottom: 'var(--sp-3)', lineHeight: 1.4 }}>
+                          "{candidate.tagline}"
+                        </p>
+
+                        <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: 'var(--sp-4)', lineHeight: 1.5 }}>
+                          {candidate.bio}
+                        </p>
+
+                        <div style={{ marginBottom: 'var(--sp-6)' }}>
+                          <h4 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', marginBottom: 'var(--sp-2)' }}>
+                            Manifesto Highlights:
+                          </h4>
+                          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {candidate.pledges.map((pledge, pIdx) => (
+                              <li key={pIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.875rem', color: '#1e293b' }}>
+                                <CheckCircle2 size={16} style={{ color: candidate.color, flexShrink: 0, marginTop: '2px' }} />
+                                <span>{pledge}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* Expand Manifesto Button using Candidate Color */}
+                      <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: 'var(--sp-4)' }}>
+                        <button
+                          onClick={() => !isWithdrawn && setSelectedCandidate(candidate)}
+                          disabled={isWithdrawn}
+                          className="btn btn--full"
                           style={{
-                            fontSize: '0.85rem',
-                            color: candidate.color || COMPANY_CANDIDATES[index]?.color || '#2563eb',
-                            fontWeight: 700,
-                            letterSpacing: '0.01em',
-                            display: 'inline-block'
+                            background: isWithdrawn ? '#94a3b8' : candidate.color,
+                            color: '#ffffff',
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            padding: '10px 16px',
+                            borderRadius: 'var(--radius-md)',
+                            border: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            cursor: isWithdrawn ? 'not-allowed' : 'pointer'
                           }}
                         >
-                          {candidate.company || COMPANY_CANDIDATES[index]?.company || `Candidate #${index + 1}`}
-                        </span>
+                          {isWithdrawn ? (
+                            <>🚫 Candidate Withdrawn</>
+                          ) : (
+                            <>
+                              <Maximize2 size={16} />
+                              Expand Manifesto
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
 
-                    {/* Lorem Ipsum Manifesto Text */}
-                    <p style={{ fontWeight: 600, color: candidate.color, fontSize: '0.95rem', marginBottom: 'var(--sp-3)', lineHeight: 1.4 }}>
-                      "{candidate.tagline}"
-                    </p>
-
-                    <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: 'var(--sp-4)', lineHeight: 1.5 }}>
-                      {candidate.bio}
-                    </p>
-
-                    <div style={{ marginBottom: 'var(--sp-6)' }}>
-                      <h4 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', marginBottom: 'var(--sp-2)' }}>
-                        Manifesto Highlights:
-                      </h4>
-                      <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {candidate.pledges.map((pledge, pIdx) => (
-                          <li key={pIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.875rem', color: '#1e293b' }}>
-                            <CheckCircle2 size={16} style={{ color: candidate.color, flexShrink: 0, marginTop: '2px' }} />
-                            <span>{pledge}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    {/* Very Visible CANDIDATE WITHDRAWN Banner */}
+                    {isWithdrawn && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%) rotate(-10deg)',
+                          background: '#dc2626',
+                          color: '#ffffff',
+                          fontWeight: 900,
+                          fontSize: '1.25rem',
+                          letterSpacing: '0.12em',
+                          padding: '12px 24px',
+                          borderRadius: '8px',
+                          border: '3px solid #ffffff',
+                          boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
+                          zIndex: 25,
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap',
+                          textTransform: 'uppercase',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          pointerEvents: 'none'
+                        }}
+                      >
+                        <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🚫</span>
+                        <span>CANDIDATE WITHDRAWN</span>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Expand Manifesto Button using Candidate Color */}
-                  <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: 'var(--sp-4)' }}>
-                    <button
-                      onClick={() => setSelectedCandidate(candidate)}
-                      className="btn btn--full"
-                      style={{
-                        background: candidate.color,
-                        color: '#ffffff',
-                        fontWeight: 600,
-                        fontSize: '0.9rem',
-                        padding: '10px 16px',
-                        borderRadius: 'var(--radius-md)',
-                        border: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px'
-                      }}
-                    >
-                      <Maximize2 size={16} />
-                      Expand Manifesto
-                    </button>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
