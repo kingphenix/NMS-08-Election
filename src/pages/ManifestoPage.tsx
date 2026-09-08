@@ -684,7 +684,7 @@ export default function ManifestoPage() {
                               cursor: isWithdrawn ? 'not-allowed' : 'pointer',
                               position: 'relative'
                             }}
-                            title={isWithdrawn ? 'Candidate Withdrawn' : 'Click to slot candidate image'}
+                            title={isWithdrawn ? 'Stepped Down' : 'Click to slot candidate image'}
                           >
                             <input
                               type="file"
@@ -773,7 +773,7 @@ export default function ManifestoPage() {
                           }}
                         >
                           {isWithdrawn ? (
-                            <>🚫 Candidate Withdrawn</>
+                            <>🚫 Stepped Down</>
                           ) : (
                             <>
                               <Maximize2 size={16} />
@@ -784,7 +784,7 @@ export default function ManifestoPage() {
                       </div>
                     </div>
 
-                    {/* Very Visible CANDIDATE WITHDRAWN Banner */}
+                    {/* Very Visible STEPPED DOWN Banner */}
                     {isWithdrawn && (
                       <div
                         style={{
@@ -812,7 +812,7 @@ export default function ManifestoPage() {
                         }}
                       >
                         <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🚫</span>
-                        <span>CANDIDATE WITHDRAWN</span>
+                        <span>CANDIDATE STEPPED DOWN</span>
                       </div>
                     )}
                   </div>

@@ -32,11 +32,13 @@ export default function VotingPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showMaxVotesPopup, setShowMaxVotesPopup] = useState(false)
+  const [showDistributeVotesPopup, setShowDistributeVotesPopup] = useState(false)
 
   const totalAllocated = Object.values(allocation).reduce((s, v) => s + v, 0)
   const remaining = TOTAL_VOTES - totalAllocated
   const hasCandidateExceedingMax = Object.values(allocation).some(v => v > MAX_VOTES_PER_CANDIDATE)
-  const isValid = selected.size >= 2 && totalAllocated === TOTAL_VOTES && !hasCandidateExceedingMax
+  const isValid = selected.size === 3 && totalAllocated === TOTAL_VOTES && !hasCandidateExceedingMax
 
   // Fetch candidates from Supabase (public read via RLS) with fallback
   useEffect(() => {
@@ -127,11 +129,27 @@ export default function VotingPage() {
       const current = prev[candidateId] ?? 1
       const newVal = current + delta
 
-      // Can't go below 1
-      if (newVal < 1) return prev
+      // If new value is 0 or below, deselect the candidate
+      if (newVal < 1) {
+        setSelected(prevSelected => {
+          const next = new Set(prevSelected)
+          next.delete(candidateId)
+          return next
+        })
+        // Remove from allocation
+        const nextAllocation = { ...prev }
+        delete nextAllocation[candidateId]
+        return nextAllocation
+      }
 
       // Can't give more than 3 votes to any single candidate (max 3 votes per candidate)
-      if (newVal > MAX_VOTES_PER_CANDIDATE) return prev
+      if (newVal > MAX_VOTES_PER_CANDIDATE) {
+        // Show popup notification
+        setShowMaxVotesPopup(true)
+        // Auto-hide after 3 seconds
+        setTimeout(() => setShowMaxVotesPopup(false), 3000)
+        return prev
+      }
 
       // Can't exceed remaining budget
       const otherTotal = Object.entries(prev)
@@ -139,6 +157,12 @@ export default function VotingPage() {
         .reduce((s, [, v]) => s + v, 0)
 
       if (otherTotal + newVal > TOTAL_VOTES) return prev
+
+      // Check if this move completes 6 votes across only 2 candidates
+      if (otherTotal + newVal === TOTAL_VOTES && selected.size < 3) {
+        setShowDistributeVotesPopup(true)
+        setTimeout(() => setShowDistributeVotesPopup(false), 4000)
+      }
 
       return { ...prev, [candidateId]: newVal }
     })
@@ -200,8 +224,8 @@ export default function VotingPage() {
               <h1 style={{ color: '#ffffff', margin: 0 }}>Cast Your Ballot</h1>
             </div>
             <p style={{ color: 'rgba(255,255,255,0.75)', margin: 0 }}>
-              Select <strong style={{ color: '#ffffff' }}>2 to {MAX_CANDIDATES} candidates</strong> and
-              distribute exactly <strong style={{ color: '#6ee7b7' }}>{TOTAL_VOTES} votes</strong> between them (maximum 3 votes per candidate).
+              Select <strong style={{ color: '#ffffff' }}>exactly 3 candidates</strong> and
+              distribute <strong style={{ color: '#6ee7b7' }}>{TOTAL_VOTES} votes</strong> across them (maximum 3 votes per candidate).
             </p>
           </motion.div>
         </div>
@@ -213,6 +237,88 @@ export default function VotingPage() {
       {/* Main content */}
       <div style={{ padding: 'var(--sp-6) var(--sp-4)' }}>
         <div className="max-w-xl">
+
+          {/* Max Votes Popup */}
+          <AnimatePresence>
+            {showMaxVotesPopup && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                style={{
+                  position: 'fixed',
+                  top: '20px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                  color: '#ffffff',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 40px rgba(220, 38, 38, 0.4)',
+                  zIndex: 10000,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  minWidth: 'unset',
+                  maxWidth: '90vw',
+                  justifyContent: 'center',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>⚠️</span>
+                <div style={{ textAlign: 'center', minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '2px', whiteSpace: 'nowrap' }}>
+                    Maximum Votes Reached
+                  </div>
+                  <div style={{ fontSize: '0.8rem', opacity: 0.9, lineHeight: 1.3 }}>
+                    You can only give up to 3 votes to one candidate
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Distribute Votes Reminder Popup */}
+          <AnimatePresence>
+            {showDistributeVotesPopup && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                style={{
+                  position: 'fixed',
+                  top: '20px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  color: '#ffffff',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 40px rgba(245, 158, 11, 0.4)',
+                  zIndex: 10000,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  minWidth: 'unset',
+                  maxWidth: '90vw',
+                  justifyContent: 'center',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>🗳️</span>
+                <div style={{ textAlign: 'center', minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '2px', whiteSpace: 'nowrap' }}>
+                    Vote Distribution Reminder
+                  </div>
+                  <div style={{ fontSize: '0.8rem', opacity: 0.95, lineHeight: 1.3 }}>
+                    You must distribute votes between 3 candidates, not just 2
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Vote Rule Announcement / Write-Up */}
           <motion.div
@@ -235,7 +341,7 @@ export default function VotingPage() {
                   Important Voting Rule
                 </h3>
                 <p style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.85)', margin: 0, lineHeight: 1.5 }}>
-                  The maximum number of votes you can assign to any candidate is <strong>3 votes</strong>. You have <strong>6 total votes</strong> to distribute across at least <strong>2 candidates</strong>.
+                  You must select <strong>3 candidates</strong> to submit your vote. The maximum number of votes you can assign to any candidate is <strong>3 votes</strong>. You have <strong>6 total votes</strong> to distribute across your <strong>3 selected candidates</strong>.
                 </p>
               </div>
             </div>
@@ -285,22 +391,6 @@ export default function VotingPage() {
               </div>
             )}
           </motion.div>
-
-          {/* Max candidates warning */}
-          <AnimatePresence>
-            {selected.size === MAX_CANDIDATES && (
-              <motion.div
-                className="alert alert-warning"
-                style={{ marginBottom: 'var(--sp-4)' }}
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-              >
-                <span>⚠️</span>
-                <span>Maximum {MAX_CANDIDATES} candidates selected. Deselect one to choose another.</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {/* Candidate Grid */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
@@ -379,7 +469,7 @@ export default function VotingPage() {
                                 borderRadius: '4px',
                                 border: '1px solid rgba(239, 68, 68, 0.3)'
                               }}>
-                                (Withdrawn)
+                                (Stepped Down)
                               </span>
                             )}
                           </div>
@@ -397,7 +487,7 @@ export default function VotingPage() {
 
                       {isWithdrawn ? (
                         <div className="badge" style={{ background: '#dc2626', color: '#ffffff', fontWeight: 700, padding: '4px 10px', fontSize: '0.75rem' }}>
-                          WITHDRAWN
+                          STEPPED DOWN
                         </div>
                       ) : (
                         <AnimatePresence>
@@ -413,7 +503,7 @@ export default function VotingPage() {
                               <button
                                 className="stepper-btn"
                                 onClick={() => adjustVote(candidate.id, -1)}
-                                disabled={votes <= 1}
+                                disabled={votes < 1}
                                 aria-label={`Decrease votes for ${candidate.name}`}
                               >−</button>
                               <motion.span
@@ -471,11 +561,13 @@ export default function VotingPage() {
             </button>
             {!isValid && (
               <p className="text-center text-xs text-subtle" style={{ marginTop: 'var(--sp-2)' }}>
-                {selected.size < 2
-                  ? 'Voters cannot cast all votes to one person. Select at least 2 candidates.'
-                  : totalAllocated < TOTAL_VOTES
-                    ? `Allocate all ${TOTAL_VOTES} votes across your candidates. ${remaining} remaining.`
-                    : 'Maximum 3 votes per candidate permitted.'
+                {selected.size < 3
+                  ? `You must select exactly 3 candidates to submit your vote. Currently selected: ${selected.size}.`
+                  : selected.size > 3
+                    ? 'You can only select exactly 3 candidates. Please deselect one.'
+                    : totalAllocated < TOTAL_VOTES
+                      ? `Allocate all ${TOTAL_VOTES} votes across your 3 candidates. ${remaining} remaining.`
+                      : 'Maximum 3 votes per candidate permitted.'
                 }
               </p>
             )}
