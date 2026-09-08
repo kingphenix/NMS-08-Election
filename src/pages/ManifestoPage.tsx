@@ -811,7 +811,7 @@ export default function ManifestoPage() {
                           pointerEvents: 'none'
                         }}
                       >
-                        <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🚫</span>
+                        <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>🚫</span>
                         <span>CANDIDATE STEPPED DOWN</span>
                       </div>
                     )}

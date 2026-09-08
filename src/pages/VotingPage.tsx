@@ -242,15 +242,14 @@ export default function VotingPage() {
           <AnimatePresence>
             {showMaxVotesPopup && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.8, y: -20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                initial={{ opacity: 0, scale: 0.8, y: -20, x: '-50%' }}
+                animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
+                exit={{ opacity: 0, scale: 0.8, y: -20, x: '-50%' }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 style={{
                   position: 'fixed',
                   top: '20px',
                   left: '50%',
-                  transform: 'translateX(-50%)',
                   background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
                   color: '#ffffff',
                   padding: '12px 16px',
@@ -260,8 +259,8 @@ export default function VotingPage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '10px',
-                  minWidth: 'unset',
-                  maxWidth: '90vw',
+                  width: 'calc(100% - 40px)',
+                  maxWidth: '360px',
                   justifyContent: 'center',
                   boxSizing: 'border-box',
                 }}
@@ -283,15 +282,14 @@ export default function VotingPage() {
           <AnimatePresence>
             {showDistributeVotesPopup && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.8, y: -20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                initial={{ opacity: 0, scale: 0.8, y: -20, x: '-50%' }}
+                animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
+                exit={{ opacity: 0, scale: 0.8, y: -20, x: '-50%' }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 style={{
                   position: 'fixed',
                   top: '20px',
                   left: '50%',
-                  transform: 'translateX(-50%)',
                   background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
                   color: '#ffffff',
                   padding: '12px 16px',
@@ -301,8 +299,8 @@ export default function VotingPage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '10px',
-                  minWidth: 'unset',
-                  maxWidth: '90vw',
+                  width: 'calc(100% - 40px)',
+                  maxWidth: '380px',
                   justifyContent: 'center',
                   boxSizing: 'border-box',
                 }}
@@ -485,11 +483,7 @@ export default function VotingPage() {
                         </div>
                       </div>
 
-                      {isWithdrawn ? (
-                        <div className="badge" style={{ background: '#dc2626', color: '#ffffff', fontWeight: 700, padding: '4px 10px', fontSize: '0.75rem' }}>
-                          STEPPED DOWN
-                        </div>
-                      ) : (
+                      {isWithdrawn ? null : (
                         <AnimatePresence>
                           {isSelected && (
                             <motion.div
