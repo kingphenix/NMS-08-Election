@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import CountdownTimer from '../components/CountdownTimer'
 import { supabase } from '../lib/supabase'
 import { adminResetToken } from '../lib/api'
 import {
@@ -483,7 +484,12 @@ export default function AdminPage() {
     return () => clearInterval(interval)
   }, [adminPw, fetchResults, fetchCredentials, fetchAuditLog])
 
-  if (!adminPw) return <PasswordGate onAuth={setAdminPw} />
+  if (!adminPw) return (
+    <>
+      <CountdownTimer />
+      <PasswordGate onAuth={setAdminPw} />
+    </>
+  )
 
   const TABS: { id: Tab; label: string; icon: string }[] = [
     { id: 'results', label: 'Results', icon: '📊' },
@@ -494,6 +500,7 @@ export default function AdminPage() {
 
   return (
     <div style={{ minHeight: '100dvh', padding: 'var(--sp-6) var(--sp-4)', paddingBottom: 'var(--sp-16)' }}>
+      <CountdownTimer />
       <div className="max-w-xl">
         {/* Header */}
         <div className="flex justify-between items-center" style={{ marginBottom: 'var(--sp-6)', flexWrap: 'wrap', gap: 12 }}>

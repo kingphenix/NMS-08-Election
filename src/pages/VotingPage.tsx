@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import CountdownTimer from '../components/CountdownTimer'
 import { supabase } from '../lib/supabase'
 import { submitBallot } from '../lib/api'
 import type { BallotEntry } from '../lib/api'
@@ -10,6 +11,9 @@ import logo from '../assets/slogo@2x.png'
 const TOTAL_VOTES = 6
 const MAX_CANDIDATES = 3
 const MAX_VOTES_PER_CANDIDATE = 3 // Maximum 3 votes per candidate
+
+const START_TIME = new Date('2026-09-12T10:00:00').getTime()
+const END_TIME = new Date('2026-09-13T23:59:00').getTime()
 
 interface Candidate {
   id: string
@@ -34,14 +38,44 @@ export default function VotingPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showMaxVotesPopup, setShowMaxVotesPopup] = useState(false)
   const [showDistributeVotesPopup, setShowDistributeVotesPopup] = useState(false)
+  const [hasStarted, setHasStarted] = useState(() => new Date().getTime() >= START_TIME)
+  const [hasEnded, setHasEnded] = useState(() => new Date().getTime() >= END_TIME)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime()
+      setHasStarted(now >= START_TIME)
+      setHasEnded(now >= END_TIME)
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   const totalAllocated = Object.values(allocation).reduce((s, v) => s + v, 0)
   const remaining = TOTAL_VOTES - totalAllocated
   const hasCandidateExceedingMax = Object.values(allocation).some(v => v > MAX_VOTES_PER_CANDIDATE)
-  const isValid = selected.size === 3 && totalAllocated === TOTAL_VOTES && !hasCandidateExceedingMax
+  const isValid = selected.size === 3 && totalAllocated === TOTAL_VOTES && !hasCandidateExceedingMax && hasStarted && !hasEnded
+
+  useEffect(() => {
+    if (!hasStarted) {
+      navigate('/login', { replace: true })
+    }
+  }, [hasStarted, navigate])
+
+  useEffect(() => {
+    if (hasEnded) {
+      setShowConfirmModal(false)
+      setSubmitError('Voting has ended. Your vote was not submitted.')
+    }
+  }, [hasEnded])
 
   // Fetch candidates from Supabase (public read via RLS) with fallback
   useEffect(() => {
+    // Redirect if voting hasn't started
+    if (new Date().getTime() < START_TIME) {
+      navigate('/login', { replace: true })
+      return
+    }
+
     let mounted = true
     const fallbackCandidates: Candidate[] = [
       { id: 'c-1', name: 'Sende Kaun Jeffrey Myles (Alpha Coy)' },
@@ -209,6 +243,7 @@ export default function VotingPage() {
 
   return (
     <div style={{ minHeight: '100dvh', paddingBottom: 'var(--sp-10)' }}>
+      <CountdownTimer />
       {/* Green hero banner — matches login page header */}
       <div style={{
         background: '#064e3b',

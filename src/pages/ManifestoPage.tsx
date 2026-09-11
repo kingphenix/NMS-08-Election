@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import CountdownTimer from '../components/CountdownTimer'
 import logo from '../assets/nms-new-logo.webp'
 import alphaCandidateImg from '../assets/images/Alpha Company.jpeg'
 import bravoCandidateImg from '../assets/images/Bravo Company Candidate.jpeg'
@@ -435,6 +436,7 @@ export default function ManifestoPage() {
 
   return (
     <div style={{ minHeight: '100dvh', background: '#f8fafc', color: '#0f172a' }}>
+      <CountdownTimer />
       {/* ── Hero Section (Starts Directly with NMS Logo & Official Class Manifesto Portal) ── */}
       <section
         style={{

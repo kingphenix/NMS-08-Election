@@ -1,6 +1,7 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import CountdownTimer from '../components/CountdownTimer'
 import { loginWithToken } from '../lib/api'
 import { setSession } from '../lib/session'
 import logo from '../assets/nms-new-logo.webp'
@@ -8,7 +9,10 @@ import logo from '../assets/nms-new-logo.webp'
 import { supabaseUrl, supabaseAnonKey } from '../lib/supabase'
 
 type LoginState = 'idle' | 'loading' | 'error'
-type ErrorCode = 'INVALID_TOKEN' | 'ALREADY_USED' | 'RATE_LIMITED' | 'ALREADY_VOTED' | 'NETWORK'
+type ErrorCode = 'INVALID_TOKEN' | 'ALREADY_USED' | 'RATE_LIMITED' | 'ALREADY_VOTED' | 'NETWORK' | 'NOT_STARTED' | 'ENDED'
+
+const START_TIME = new Date('2026-09-12T10:00:00').getTime()
+const END_TIME = new Date('2026-09-13T23:59:00').getTime()
 
 const ERROR_MESSAGES: Record<ErrorCode, string> = {
   INVALID_TOKEN:  'Invalid credential. Please double-check your token and try again.',
@@ -16,6 +20,8 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   RATE_LIMITED:   'Too many failed attempts. Please wait 15 minutes and try again.',
   ALREADY_VOTED:  'Your vote has already been recorded with this credential.',
   NETWORK:        'Connection error. Please check your internet and try again.',
+  NOT_STARTED:    'Voting has not started yet. Please return at 10:00 AM on Saturday.',
+  ENDED:          'Voting has ended. Thank you for your interest.',
 }
 
 /** Formats raw alphanumeric input into XXXX-XXXX-XXXX-XXXX */
@@ -33,7 +39,18 @@ export default function LoginPage() {
   const [tokenDisplay, setTokenDisplay] = useState('')
   const [state, setState] = useState<LoginState>('idle')
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null)
+  const [hasStarted, setHasStarted] = useState(() => new Date().getTime() >= START_TIME)
+  const [hasEnded, setHasEnded] = useState(() => new Date().getTime() >= END_TIME)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime()
+      setHasStarted(now >= START_TIME)
+      setHasEnded(now >= END_TIME)
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   const rawToken = tokenDisplay.replace(/-/g, '')
   const isComplete = rawToken.length >= 15 && rawToken.length <= 16
@@ -48,11 +65,18 @@ export default function LoginPage() {
   }, [state])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && isComplete) handleSubmit()
+    if (e.key === 'Enter' && isComplete && hasStarted && !hasEnded) handleSubmit()
   }
 
   const handleSubmit = async () => {
-    if (!isComplete || state === 'loading') return
+    if (!isComplete || state === 'loading' || !hasStarted) return
+
+    if (hasEnded) {
+      setState('error')
+      setErrorCode('ENDED')
+      return
+    }
+
     setState('loading')
     setErrorCode(null)
 
@@ -75,19 +99,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="page-center" style={{ paddingTop: '180px' }}>
+    <>
+      <CountdownTimer />
       {/* Top Header Bar */}
       <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 'var(--sp-8) 0',
         borderBottom: '2px solid rgba(255, 255, 255, 0.15)',
         background: '#064e3b',
+        position: 'relative',
         zIndex: 10
       }}>
         <img
@@ -104,13 +126,14 @@ export default function LoginPage() {
         </h1>
       </div>
 
-      <motion.div
-        className="max-w-sm"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        style={{ position: 'relative', zIndex: 1 }}
-      >
+      <div className="page-center" style={{ minHeight: 'calc(100dvh - 200px)' }}>
+        <motion.div
+          className="max-w-sm"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          style={{ position: 'relative', zIndex: 1 }}
+        >
         {(!supabaseUrl || !supabaseAnonKey) && (
           <div className="alert alert-error" style={{ marginBottom: 'var(--sp-4)' }}>
             <span>⚠️</span>
@@ -146,7 +169,7 @@ export default function LoginPage() {
               onChange={handleInput}
               onKeyDown={handleKeyDown}
               maxLength={19} /* 16 chars + 3 dashes */
-              disabled={state === 'loading'}
+              disabled={state === 'loading' || !hasStarted || hasEnded}
               style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: '1.2rem',
@@ -184,12 +207,22 @@ export default function LoginPage() {
             className="btn btn-primary btn--full"
             style={{ marginTop: 'var(--sp-5)' }}
             onClick={handleSubmit}
-            disabled={!isComplete || state === 'loading'}
+            disabled={!isComplete || state === 'loading' || !hasStarted || hasEnded}
           >
             {state === 'loading' ? (
               <>
                 <span className="spinner" />
                 Verifying…
+              </>
+            ) : !hasStarted ? (
+              <>
+                <span>⏳</span>
+                Voting Opens Saturday 10:00
+              </>
+            ) : hasEnded ? (
+              <>
+                <span>🔒</span>
+                Voting Has Ended
               </>
             ) : (
               <>
@@ -207,6 +240,7 @@ export default function LoginPage() {
           <a href="/admin" style={{ color: 'var(--color-text-subtle)' }}>Admin →</a>
         </p>
       </motion.div>
-    </div>
+      </div>
+    </>
   )
 }
