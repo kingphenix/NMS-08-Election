@@ -33,14 +33,18 @@ interface AuditEntry {
 /* ── Admin Password Gate ───────────────────────────────────── */
 function PasswordGate({ onAuth }: { onAuth: (pw: string) => void }) {
   const [pw, setPw] = useState('')
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const expectedPassword =
+    import.meta.env.VITE_ADMIN_PASSWORD ||
+    import.meta.env.ADMIN_PASSWORD ||
+    '08election'
 
   const submit = () => {
-    // Minimal client-side check — real auth is on Edge Functions
-    if (pw.length >= 6) {
-      onAuth(pw)
+    if (pw.trim() === expectedPassword.trim()) {
+      onAuth(pw.trim())
     } else {
-      setError(true)
+      setError('Incorrect admin password. Please try again.')
     }
   }
 
@@ -64,12 +68,12 @@ function PasswordGate({ onAuth }: { onAuth: (pw: string) => void }) {
             className="input"
             type="password"
             value={pw}
-            onChange={e => { setPw(e.target.value); setError(false) }}
+            onChange={e => { setPw(e.target.value); setError(null) }}
             onKeyDown={e => e.key === 'Enter' && submit()}
             placeholder="••••••••"
-            style={error ? { borderColor: 'var(--color-error)' } : {}}
+            style={error ? { borderColor: 'var(--color-error)', boxShadow: '0 0 0 3px rgba(239,68,68,0.15)' } : {}}
           />
-          {error && <p className="text-sm" style={{ color: 'var(--color-error)' }}>Password too short.</p>}
+          {error && <p className="text-sm" style={{ color: 'var(--color-error)', marginTop: '6px' }}>{error}</p>}
         </div>
 
         <button
@@ -392,9 +396,19 @@ const ADMIN_PW_KEY = 'nms_admin_pw'
 
 /* ── Main Admin Page ───────────────────────────────────────── */
 export default function AdminPage() {
+  const expectedPassword =
+    import.meta.env.VITE_ADMIN_PASSWORD ||
+    import.meta.env.ADMIN_PASSWORD ||
+    '08election'
+
   const [adminPw, setAdminPwState] = useState<string | null>(() => {
     try {
-      return sessionStorage.getItem(ADMIN_PW_KEY)
+      const stored = sessionStorage.getItem(ADMIN_PW_KEY)
+      if (stored && stored.trim() === expectedPassword.trim()) {
+        return stored.trim()
+      }
+      sessionStorage.removeItem(ADMIN_PW_KEY)
+      return null
     } catch {
       return null
     }
