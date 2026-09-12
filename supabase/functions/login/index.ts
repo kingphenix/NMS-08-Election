@@ -73,13 +73,15 @@ serve(async (req: Request) => {
     );
   }
 
-  // ── Look up all unused credentials and compare hashes ───────
-  // We can't do a WHERE on the hash directly since bcrypt is not deterministic.
-  // For 150 rows this is fast enough. We only compare against unused tokens.
+  // ── Look up credentials matching the last 4 characters ────────
+  // Filtering by token_last_four avoids running bcrypt.compare in a loop over 100+ rows,
+  // preventing Deno Edge Function WORKER_RESOURCE_LIMIT (546) CPU timeouts.
+  const lastFour = rawToken.slice(-4);
+
   const { data: credentials, error: fetchError } = await supabase
     .from("voter_credentials")
     .select("id, token_hash, status, has_voted")
-    .eq("status", "unused");
+    .eq("token_last_four", lastFour);
 
   if (fetchError) {
     console.error("DB fetch error:", fetchError);

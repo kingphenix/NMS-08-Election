@@ -39,6 +39,7 @@ export default function LoginPage() {
   const [tokenDisplay, setTokenDisplay] = useState('')
   const [state, setState] = useState<LoginState>('idle')
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null)
+  const [customError, setCustomError] = useState<string | null>(null)
   const [hasStarted, setHasStarted] = useState(() => new Date().getTime() >= START_TIME)
   const [hasEnded, setHasEnded] = useState(() => new Date().getTime() >= END_TIME)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -61,6 +62,7 @@ export default function LoginPage() {
     if (state === 'error') {
       setState('idle')
       setErrorCode(null)
+      setCustomError(null)
     }
   }, [state])
 
@@ -74,11 +76,13 @@ export default function LoginPage() {
     if (hasEnded) {
       setState('error')
       setErrorCode('ENDED')
+      setCustomError(null)
       return
     }
 
     setState('loading')
     setErrorCode(null)
+    setCustomError(null)
 
     try {
       const result = await loginWithToken(rawToken)
@@ -86,6 +90,7 @@ export default function LoginPage() {
       if (result.has_voted) {
         setState('error')
         setErrorCode('ALREADY_VOTED')
+        setCustomError(null)
         return
       }
 
@@ -93,8 +98,15 @@ export default function LoginPage() {
       navigate('/vote', { replace: true })
     } catch (err: unknown) {
       setState('error')
-      const code = (err as Record<string, string>).code as ErrorCode
-      setErrorCode(ERROR_MESSAGES[code] ? code : 'NETWORK')
+      const errObj = err as Record<string, string>
+      const code = errObj.code as ErrorCode
+      if (ERROR_MESSAGES[code]) {
+        setErrorCode(code)
+        setCustomError(null)
+      } else {
+        setErrorCode('NETWORK')
+        setCustomError(errObj.message || 'Connection error. Please check your internet and try again.')
+      }
     }
   }
 
@@ -186,7 +198,7 @@ export default function LoginPage() {
 
           {/* Error */}
           <AnimatePresence>
-            {state === 'error' && errorCode && (
+            {state === 'error' && (errorCode || customError) && (
               <motion.div
                 className="alert alert-error"
                 style={{ marginTop: 'var(--sp-4)' }}
@@ -196,7 +208,7 @@ export default function LoginPage() {
                 transition={{ duration: 0.2 }}
               >
                 <span>⚠️</span>
-                <span>{ERROR_MESSAGES[errorCode]}</span>
+                <span>{customError || (errorCode ? ERROR_MESSAGES[errorCode] : 'An error occurred.')}</span>
               </motion.div>
             )}
           </AnimatePresence>
