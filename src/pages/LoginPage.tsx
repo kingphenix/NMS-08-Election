@@ -12,7 +12,7 @@ type LoginState = 'idle' | 'loading' | 'error'
 type ErrorCode = 'INVALID_TOKEN' | 'ALREADY_USED' | 'RATE_LIMITED' | 'ALREADY_VOTED' | 'NETWORK' | 'NOT_STARTED' | 'ENDED'
 
 const START_TIME = new Date('2026-09-12T10:00:00').getTime()
-const END_TIME = new Date('2026-09-13T23:59:00').getTime()
+const END_TIME = new Date('2026-09-12T23:59:00').getTime()
 
 const ERROR_MESSAGES: Record<ErrorCode, string> = {
   INVALID_TOKEN:  'Invalid credential. Please double-check your token and try again.',

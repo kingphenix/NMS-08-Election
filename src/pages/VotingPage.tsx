@@ -13,7 +13,7 @@ const MAX_CANDIDATES = 3
 const MAX_VOTES_PER_CANDIDATE = 3 // Maximum 3 votes per candidate
 
 const START_TIME = new Date('2026-09-12T10:00:00').getTime()
-const END_TIME = new Date('2026-09-13T23:59:00').getTime()
+const END_TIME = new Date('2026-09-12T23:59:00').getTime()
 
 interface Candidate {
   id: string

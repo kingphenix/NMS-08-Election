@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Clock } from 'lucide-react'
 
-// Specific dates for Saturday Sept 12 and Sunday Sept 13, 2026
+// Specific dates for Saturday Sept 12, 2026
 const START_TIME = new Date('2026-09-12T10:00:00').getTime()
-const END_TIME = new Date('2026-09-13T23:59:00').getTime()
+const END_TIME = new Date('2026-09-12T23:59:00').getTime()
 
 export default function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState<number>(0)
@@ -82,7 +82,7 @@ export default function CountdownTimer() {
         }}>
           {status === 'upcoming' 
             ? 'Voting starts 10:00 on Saturday' 
-            : 'Voting ends 23:59 on Sunday'}
+            : 'Voting ends 23:59 today'}
         </span>
         <span style={{ 
           fontFamily: 'var(--font-mono)', 
